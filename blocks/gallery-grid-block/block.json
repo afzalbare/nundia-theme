@@ -1,0 +1,23 @@
+{
+  "name": "acf/gallery-grid-block",
+  "title": "Gallery Grid Block",
+  "description": "Show Gallery Grid in this block",
+  "category": "layout",
+  "icon": "format-gallery",
+  "keywords": ["Gallery", "Images", "Photos", "Grid"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "gallery-grid-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

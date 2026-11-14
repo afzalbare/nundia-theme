@@ -1,0 +1,23 @@
+{
+  "name": "acf/text-media-block",
+  "title": "Text Media Block ",
+  "description": "Show text media in this block",
+  "category": "layout",
+  "icon": "align-pull-left",
+  "keywords": ["text", "media", "text media"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "text-media-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

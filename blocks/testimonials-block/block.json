@@ -1,0 +1,23 @@
+{
+  "name": "acf/testimonials-block",
+  "title": "Testimonials Block",
+  "description": "Show testimonials in this block",
+  "category": "layout",
+  "icon": "testimonial",
+  "keywords": ["testimonials", "reviews", "feedback"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "testimonials-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

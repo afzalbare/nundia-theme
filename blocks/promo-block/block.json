@@ -1,0 +1,23 @@
+{
+  "name": "acf/promo-block",
+  "title": "Promo Block",
+  "description": "Show promo in this block",
+  "category": "layout",
+  "icon": "embed-photo",
+  "keywords": ["promo", "short", "banner", "image"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "promo-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

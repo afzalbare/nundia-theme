@@ -1,0 +1,23 @@
+{
+  "name": "acf/contact-block",
+  "title": "Contact Block",
+  "description": "Show contact in this block",
+  "category": "layout",
+  "icon": "email-alt",
+  "keywords": ["contact", "form", "Contact Form"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "contact-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

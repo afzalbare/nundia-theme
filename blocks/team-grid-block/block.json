@@ -1,0 +1,23 @@
+{
+  "name": "acf/team-grid-block",
+  "title": "Team Grid Block",
+  "description": "Showing All Team in this block",
+  "category": "layout",
+  "icon": "groups",
+  "keywords": ["team", "members", "staff", "team members"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "team-grid-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

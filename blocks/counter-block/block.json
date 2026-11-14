@@ -1,0 +1,23 @@
+{
+  "name": "acf/counter-block",
+  "title": "Counter Block",
+  "description": "Show counter in this block",
+  "category": "layout",
+  "icon": "editor-aligncenter",
+  "keywords": ["counter", "number", "statistics"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "counter-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

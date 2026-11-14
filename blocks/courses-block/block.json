@@ -1,0 +1,23 @@
+{
+  "name": "acf/courses-block",
+  "title": "Courses Block",
+  "description": "Show Courses in this block",
+  "category": "layout",
+  "icon": "welcome-learn-more",
+  "keywords": ["courses", "our courses", "lessons", "classes"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "courses-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

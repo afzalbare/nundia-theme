@@ -1,0 +1,23 @@
+{
+  "name": "acf/gallery-block",
+  "title": "Gallery Block",
+  "description": "Show Gallery in this block",
+  "category": "layout",
+  "icon": "images-alt2",
+  "keywords": ["Gallery", "Images", "Photos"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "gallery-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

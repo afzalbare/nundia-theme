@@ -1,0 +1,23 @@
+{
+  "name": "acf/team-block",
+  "title": "Team Block",
+  "description": "Show Team in this block",
+  "category": "layout",
+  "icon": "images-alt",
+  "keywords": ["team", "members", "staff", "team members"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "team-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

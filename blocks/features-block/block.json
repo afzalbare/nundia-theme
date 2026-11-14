@@ -1,0 +1,23 @@
+{
+  "name": "acf/features-block",
+  "title": "Features Block",
+  "description": "Show features in this block",
+  "category": "layout",
+  "icon": "editor-aligncenter",
+  "keywords": ["features", "services"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "features-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}

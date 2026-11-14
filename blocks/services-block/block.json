@@ -1,0 +1,23 @@
+{
+  "name": "acf/services-block",
+  "title": "Services Block",
+  "description": "Show services in this block",
+  "category": "layout",
+  "icon": "admin-generic",
+  "keywords": ["services"],
+  "acf": {
+    "mode": "edit",
+    "renderTemplate": "services-block.php"
+  },
+  "supports": {
+    "align": false,
+    "anchor": true,
+    "mode": true
+  },
+  "example": {
+    "attributes": {
+      "mode": "preview",
+      "is_preview": true
+    }
+  }
+}
