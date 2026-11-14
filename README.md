@@ -117,6 +117,18 @@ nundia/
 
 ---
 
-## 📄 License & Credits
+## 👨‍💻 Author & Developer Credits
 
-Developed for **NUNDÌA**. All rights reserved.
+This custom WordPress theme was developed and architected by:
+
+- **Lead WordPress Developer:** **Afzal**
+- **GitHub Profile:** [@afzalbare](https://github.com/afzalbare)
+- **Repository:** [https://github.com/afzalbare/nundia-theme](https://github.com/afzalbare/nundia-theme)
+
+All architecture, custom block development, responsive layouts, dynamic ACF integrations, and Tailwind styling are crafted by **Afzal**.
+
+---
+
+## 📄 License & Copyright
+
+Copyright © 2026 **Afzal**. Developed for **NUNDÌA**. All rights reserved.
