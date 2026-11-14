@@ -19,7 +19,7 @@ if (!$image && !$eyebrow && !$title && !$sub && !$body && !$cta) {
     return;
 }
 ?>
-<section class="bg-background py-16 lg:py-24">
+<section class="bg-background pb-16 lg:pb-24">
     <div class="container-ed">
         <div class="grid items-center gap-10 <?php echo $image ? 'lg:grid-cols-2 lg:gap-16' : 'max-w-3xl mx-auto'; ?>">
             <?php if ($image): ?>

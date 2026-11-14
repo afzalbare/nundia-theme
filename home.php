@@ -1,4 +1,5 @@
 <?php
+
 /**
  * News ("Notizie" / journal) – posts page.
  */
@@ -59,23 +60,24 @@ $meta = function ($p) {
                     </div>
                     <?php if (count($posts) > 1): ?>
                         <div class="mt-14 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                    <?php endif; ?>
-                <?php else: ?>
-                    <div class="reveal" data-item data-cat="<?php echo esc_attr($slugs); ?>" data-text="<?php echo $text; ?>"<?php echo $i > 1 ? ' style="transition-delay: ' . (80 * (($i - 1) % 3)) . 'ms;"' : ''; ?>>
-                        <a class="group block" href="<?php echo esc_url(get_permalink($p)); ?>">
-                            <?php if ($img_rest): ?>
-                                <div class="overflow-hidden rounded-md"><?php echo $img_rest; ?></div>
-                            <?php endif; ?>
-                            <p class="mt-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"><?php echo esc_html($meta($p)); ?></p>
-                            <h3 class="mt-2 text-lg leading-snug group-hover:text-primary"><?php echo esc_html(get_the_title($p)); ?></h3>
-                            <?php if ($excerpt): ?>
-                                <p class="mt-2 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground"><?php echo esc_html($excerpt); ?></p>
-                            <?php endif; ?>
-                        </a>
-                    </div>
-                <?php endif;
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <div class="reveal" data-item data-cat="<?php echo esc_attr($slugs); ?>" data-text="<?php echo $text; ?>" <?php echo $i > 1 ? ' style="transition-delay: ' . (80 * (($i - 1) % 3)) . 'ms;"' : ''; ?>>
+                            <a class="group block" href="<?php echo esc_url(get_permalink($p)); ?>">
+                                <?php if ($img_rest): ?>
+                                    <div class="overflow-hidden rounded-md"><?php echo $img_rest; ?></div>
+                                <?php endif; ?>
+                                <p class="mt-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"><?php echo esc_html($meta($p)); ?></p>
+                                <h3 class="mt-2 text-lg leading-snug group-hover:text-primary"><?php echo esc_html(get_the_title($p)); ?></h3>
+                                <?php if ($excerpt): ?>
+                                    <p class="mt-2 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground"><?php echo esc_html($excerpt); ?></p>
+                                <?php endif; ?>
+                            </a>
+                        </div>
+                    <?php endif;
             endforeach;
-            if (count($posts) > 1): ?></div><?php endif; ?>
+            if (count($posts) > 1): ?>
+                        </div><?php endif; ?>
         </div>
         <p class="js-empty hidden py-16 text-center text-[15px] text-muted-foreground">Nessun articolo trovato.</p>
     <?php else: ?>
