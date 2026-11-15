@@ -1152,3 +1152,27 @@ font[style] {
   background: hsl(var(--primary)) !important;
 }
 
+/* ==========================================================================
+   Categories Grid (Desktop 4, Tablet 2, Mobile 2)
+   ========================================================================== */
+.nd-categories-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  column-gap: 1.25rem;
+  row-gap: 2rem;
+}
+
+@media (min-width: 640px) {
+  .nd-categories-grid {
+    column-gap: 1.75rem;
+    row-gap: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nd-categories-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+

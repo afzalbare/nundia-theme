@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Layout Module: Hero Slider
  * Client change: the hero slides advance automatically (no arrows / dashes).

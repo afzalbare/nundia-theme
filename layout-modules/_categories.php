@@ -34,13 +34,13 @@ $title = nd('home_cat_title');
             <?php endif; ?>
         </div>
         <?php endif; ?>
-        <div class="mt-12 flex flex-wrap justify-center gap-x-7 gap-y-10">
+        <div class="mt-12 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-x-5 sm:gap-x-7 gap-y-8 sm:gap-y-10 nd-categories-grid">
             <?php foreach ($cats as $i => $cat):
                 $thumb = get_term_meta($cat->term_id, 'thumbnail_id', true);
                 $shop_url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/shop/');
                 $cat_link = add_query_arg('cat', $cat->slug, $shop_url);
             ?>
-                <div class="reveal w-[42%] min-w-[140px] text-center sm:w-[28%] lg:w-[17.5%]"<?php echo $i ? ' style="transition-delay: ' . (70 * $i) . 'ms;"' : ''; ?>>
+                <div class="reveal text-center"<?php echo $i ? ' style="transition-delay: ' . (70 * $i) . 'ms;"' : ''; ?>>
                     <a class="group block" href="<?php echo esc_url($cat_link); ?>">
                         <?php if ($thumb): ?>
                             <div class="overflow-hidden rounded-md">

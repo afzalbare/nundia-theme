@@ -30,6 +30,9 @@ require(get_template_directory() . '/_/inc/_icons.php');
 require(get_template_directory() . '/_/inc/_components.php');
 require(get_template_directory() . '/_/inc/_fields.php');
 
+// Security Hardening (Headers, XML-RPC, REST enumeration, Version concealment)
+require(get_template_directory() . '/_/inc/_security.php');
+
 /**
  * ksa helper function (from blessingChild)
  */
@@ -351,9 +354,25 @@ add_action('wp_ajax_nopriv_nundia_ajax_contact', 'nundia_ajax_contact_handler');
 
 function nundia_ajax_newsletter_handler() {
     check_ajax_referer('nundia_nonce', 'nonce');
+
+    // Rate limiting: max 5 requests per 5 minutes per IP
+    $ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field($_SERVER['REMOTE_ADDR']) : 'unknown';
+    $rate_key = 'nd_nl_rate_' . md5($ip);
+    $attempts = (int) get_transient($rate_key);
+    if ($attempts >= 5) {
+        wp_send_json_error(array('message' => 'Troppi tentativi. Riprova più tardi.'));
+    }
+    set_transient($rate_key, $attempts + 1, 300);
+
     $email = sanitize_email(nundia_post_field('email'));
     if (!is_email($email)) wp_send_json_error(array('message' => 'Indirizzo email non valido.'));
     $list = get_option('nundia_newsletter', array());
+    if (!is_array($list)) {
+        $list = array();
+    }
+    if (count($list) >= 10000) {
+        wp_send_json_error(array('message' => 'Servizio momentaneamente non disponibile.'));
+    }
     if (!in_array($email, $list, true)) {
         $list[] = $email;
         update_option('nundia_newsletter', $list, false);
@@ -363,9 +382,9 @@ function nundia_ajax_newsletter_handler() {
 add_action('wp_ajax_nundia_ajax_newsletter', 'nundia_ajax_newsletter_handler');
 add_action('wp_ajax_nopriv_nundia_ajax_newsletter', 'nundia_ajax_newsletter_handler');
 
-// Newsletter admin menu under Tools
+// Newsletter admin menu under Tools (restricted to administrators)
 add_action('admin_menu', function () {
-    add_submenu_page('tools.php', 'Iscritti newsletter', 'Newsletter NUNDÌA', 'edit_posts', 'nundia-newsletter', function () {
+    add_submenu_page('tools.php', 'Iscritti newsletter', 'Newsletter NUNDÌA', 'manage_options', 'nundia-newsletter', function () {
         $list = get_option('nundia_newsletter', array());
         echo '<div class="wrap"><h1>Iscritti newsletter (' . count($list) . ')</h1><textarea readonly rows="20" style="width:100%;max-width:640px">' . esc_textarea(implode("\n", $list)) . '</textarea></div>';
     });
