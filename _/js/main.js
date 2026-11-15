@@ -65,46 +65,153 @@
     reveals.forEach(function (el) { el.classList.add('is-visible'); });
   }
 
-  /* 4. Home hero – advances automatically (no manual controls, per client request) */
-  var hero = $('.nd-hero');
-  if (hero) {
-    var slides = $$('.nd-hero-slide', hero);
-    var texts = $$('.nd-hero-text', hero);
-    var current = 0;
-    var show = function (n) {
-      slides.forEach(function (s, i) {
-        swap(s, i === n ? 'opacity-0' : 'opacity-100', i === n ? 'opacity-100' : 'opacity-0');
-        var inner = s.firstElementChild;
-        if (inner) inner.classList.toggle('animate-drift', i === n);
+  /* 4. Swiper JS Initializations (Hero, Bestsellers, News, Testimonials, Banner) */
+  if (typeof Swiper !== 'undefined') {
+    /* 4a. Home Hero Swiper (crossfade with automatic advance) */
+    var heroEl = $('.hero-swiper');
+    if (heroEl) {
+      var heroSlides = $$('.swiper-slide', heroEl);
+      if (heroSlides.length > 1) {
+        var heroInterval = parseInt(heroEl.dataset.interval, 10) || 9000;
+        new Swiper('.hero-swiper', {
+          effect: 'fade',
+          fadeEffect: {
+            crossFade: true,
+          },
+          speed: 1200,
+          loop: true,
+          autoplay: {
+            delay: heroInterval,
+            disableOnInteraction: false,
+          },
+          allowTouchMove: true,
+        });
+      }
+    }
+
+    /* 4b. Bestsellers Product Swiper (Desktop: 4, Tablet: 2, Mobile: 1, Gap: 20px) */
+    if ($('.bestsellers-swiper')) {
+      new Swiper('.bestsellers-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        navigation: {
+          prevEl: '.nd-bestsellers-prev',
+          nextEl: '.nd-bestsellers-next',
+        },
+        mousewheel: {
+          forceToAxis: true,
+          releaseOnEdges: true,
+        },
+        breakpoints: {
+          640: {
+            slidesPerView: 2,
+            spaceBetween: 20,
+          },
+          1024: {
+            slidesPerView: 4,
+            spaceBetween: 20,
+          },
+        },
       });
-      texts.forEach(function (t, i) {
-        var active = (i === n);
-        t.classList.toggle('opacity-100', active);
-        t.classList.toggle('pointer-events-auto', active);
-        t.classList.toggle('z-10', active);
-        t.classList.toggle('opacity-0', !active);
-        t.classList.toggle('pointer-events-none', !active);
-        t.classList.toggle('z-0', !active);
+    }
+
+    /* 4c. Notizie / News Swiper (Desktop: 4, Tablet: 2, Mobile: 1, Gap: 20px) */
+    if ($('.news-swiper')) {
+      window.newsSwiperInstance = new Swiper('.news-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        navigation: {
+          prevEl: '.nd-news-prev',
+          nextEl: '.nd-news-next',
+        },
+        mousewheel: {
+          forceToAxis: true,
+          releaseOnEdges: true,
+        },
+        breakpoints: {
+          640: {
+            slidesPerView: 2,
+            spaceBetween: 20,
+          },
+          1024: {
+            slidesPerView: 4,
+            spaceBetween: 20,
+          },
+        },
       });
-      current = n;
-    };
-    if (slides.length > 1) {
-      var interval = parseInt(hero.dataset.interval, 10) || 9000;
-      setInterval(function () { if (!document.hidden) show((current + 1) % slides.length); }, interval);
+    }
+
+    /* 4d. Testimonials Swiper */
+    if ($('.testimonial-swiper')) {
+      new Swiper('.testimonial-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: true,
+        autoplay: {
+          delay: 6000,
+          disableOnInteraction: false,
+        },
+        pagination: {
+          el: '.testimonial-swiper .swiper-pagination',
+          clickable: true,
+        },
+        breakpoints: {
+          640: {
+            slidesPerView: 2,
+            spaceBetween: 20,
+          },
+        },
+      });
+    }
+
+    /* 4e. Banner Slider Module Swiper */
+    if ($('.bannerSlider')) {
+      new Swiper('.bannerSlider', {
+        slidesPerView: 1,
+        spaceBetween: 0,
+        loop: true,
+        autoplay: {
+          delay: 5000,
+          disableOnInteraction: false,
+        },
+        pagination: {
+          el: '.bannerSlider .swiper-pagination',
+          clickable: true,
+        },
+      });
     }
   }
 
-  /* 5. Product carousel arrows */
-  $$('.nd-carousel').forEach(function (c) {
-    var track = $('.nd-carousel-track', c);
-    $$('.nd-carousel-btn', c).forEach(function (b) {
-      b.addEventListener('click', function () {
-        var card = track.firstElementChild;
-        var gap = parseFloat(window.getComputedStyle(track).gap) || 20;
-        var step = card ? (card.getBoundingClientRect().width + gap) : track.clientWidth * 0.8;
-        track.scrollBy({ left: step * parseInt(b.dataset.dir, 10), behavior: 'smooth' });
+  /* 5. Fallback for any non-Swiper carousel tracks */
+  $$('.nd-carousel-track').forEach(function (track) {
+    var c = track.closest('.nd-carousel');
+    if (!track) return;
+
+    if (c) {
+      $$('.nd-carousel-btn', c).forEach(function (b) {
+        b.addEventListener('click', function () {
+          var card = track.firstElementChild;
+          var gap = parseFloat(window.getComputedStyle(track).gap) || 20;
+          var step = card ? (card.getBoundingClientRect().width + gap) : track.clientWidth * 0.8;
+          track.scrollBy({ left: step * parseInt(b.dataset.dir, 10), behavior: 'smooth' });
+        });
       });
-    });
+    }
+
+    /* Mouse wheel scroll: rolling wheel up/down slides the carousel horizontally */
+    track.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        var maxScroll = track.scrollWidth - track.clientWidth;
+        if (maxScroll > 4) {
+          var atStart = track.scrollLeft <= 4 && e.deltaY < 0;
+          var atEnd = track.scrollLeft >= maxScroll - 4 && e.deltaY > 0;
+          if (!atStart && !atEnd) {
+            e.preventDefault();
+            track.scrollBy({ left: e.deltaY * 1.3, behavior: 'auto' });
+          }
+        }
+      }
+    }, { passive: false });
   });
 
   /* 6. Cart: add to cart, badge, quantity selector, cart page updates */
@@ -163,6 +270,10 @@
     var section = grid.closest('section');
     var empty = section && $('.js-empty', section);
     if (empty) empty.classList.toggle('hidden', visible > 0);
+    if (target === '#news-list' && window.newsSwiperInstance) {
+      window.newsSwiperInstance.update();
+      window.newsSwiperInstance.slideTo(0);
+    }
     return visible;
   };
   $$('.js-filter').forEach(function (bar) {

@@ -14,15 +14,15 @@
 
 /* Single-row streamlined header: slim, elegant height per client specifications */
 :root {
-  --nd-row: 64px;
-  --nd-pad-y: 6px;
+  --nd-row: 56px;
+  --nd-pad-y: 4px;
   --nd-top: 0px;
 }
 
 @media (min-width: 640px) {
   :root {
-    --nd-row: 72px;
-    --nd-pad-y: 6px;
+    --nd-row: 68px;
+    --nd-pad-y: 5px;
   }
 }
 
@@ -44,18 +44,18 @@
 }
 
 .nd-header-row {
-  height: 100px;
+  height: var(--nd-row);
   transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: height;
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 1024px) {
   .nd-header-row {
-    height: 70px;
+    height: 100px;
   }
 }
 
-/* Scrolled Header State: header height 70px, logo 70px */
+/* Scrolled Header State */
 .nd-header.is-scrolled {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
@@ -63,25 +63,51 @@
 }
 
 .nd-header.is-scrolled .nd-header-row {
-  height: 80px !important;
+  height: 54px !important;
 }
 
 .nd-header.is-scrolled .nd-logo img {
-  height: 80px !important;
-  max-height: 80px !important;
+  height: 48px !important;
+  max-height: 48px !important;
 }
 
 .nd-header.is-scrolled .nd-mobile-menu {
-  top: 80px !important;
+  top: 54px !important;
+}
+
+@media (min-width: 640px) {
+  .nd-header.is-scrolled .nd-header-row {
+    height: 64px !important;
+  }
+
+  .nd-header.is-scrolled .nd-logo img {
+    height: 56px !important;
+    max-height: 56px !important;
+  }
+
+  .nd-header.is-scrolled .nd-mobile-menu {
+    top: 64px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nd-header.is-scrolled .nd-header-row {
+    height: 80px !important;
+  }
+
+  .nd-header.is-scrolled .nd-logo img {
+    height: 75px !important;
+    max-height: 75px !important;
+  }
 }
 
 .admin-bar .nd-header.is-scrolled .nd-mobile-menu {
-  top: calc(70px + 32px) !important;
+  top: calc(54px + 32px) !important;
 }
 
 @media (max-width: 782px) {
   .admin-bar .nd-header.is-scrolled .nd-mobile-menu {
-    top: calc(70px + 46px) !important;
+    top: calc(54px + 46px) !important;
   }
 }
 
@@ -131,8 +157,8 @@
   grid-area: logo;
   display: block;
   width: auto;
-  height: 100px;
-  max-height: 100px;
+  height: 50px;
+  max-height: 50px;
   object-fit: contain;
   transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -143,15 +169,15 @@
 
 @media (min-width: 640px) {
   .nd-logo img {
-    height: 70px;
-    max-height: 70px;
+    height: 62px;
+    max-height: 62px;
   }
 }
 
 @media (min-width: 1024px) {
   .nd-logo img {
-    height: 90px;
-    max-height: 90px;
+    height: 100px;
+    max-height: 100px;
   }
 }
 
@@ -284,7 +310,7 @@
   }
 
   .nd-nav a {
-    font-size: 14px !important;
+    font-size: 16px !important;
     letter-spacing: 0.05em !important;
   }
 
@@ -381,10 +407,18 @@
 
 .nd-footer-logo img {
   display: block;
-  width: 150px;
+  width: 110px;
+  max-height: 122px;
   height: auto;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.40));
   image-rendering: -webkit-optimize-contrast;
+}
+
+@media (min-width: 640px) {
+  .nd-footer-logo img {
+    width: 135px;
+    max-height: 150px;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -395,6 +429,7 @@
 
   .nd-footer-logo img {
     width: 150px;
+    max-height: none;
   }
 
   .nd-footer-top {
@@ -857,6 +892,14 @@ font[style] {
     transform: translateY(-50%) scale(0.96);
   }
 
+  .nd-carousel-side-btn.swiper-button-disabled {
+    opacity: 0.35;
+    pointer-events: none;
+    cursor: default;
+    transform: translateY(-50%) scale(1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
   .nd-carousel-side-prev {
     left: -16px;
   }
@@ -883,9 +926,9 @@ font[style] {
 
 /* ==========================================================================
    Responsive Carousel Grid:
-   - Mobile (< 640px): 2 cards per view
-   - Tablet (640px - 1023px): 2 cards per view
-   - Desktop (>= 1024px): 4 cards per view
+   - Mobile (< 640px): 1 card per view (gap: 20px)
+   - Tablet (640px - 1023px): 2 cards per view (gap: 20px)
+   - Desktop (>= 1024px): 4 cards per view (gap: 20px)
    ========================================================================== */
 
 .nd-carousel-track {
@@ -898,12 +941,12 @@ font[style] {
   padding-bottom: 1.25rem;
   padding-left: 0.25rem;
   padding-right: 0.25rem;
-  gap: 12px;
+  gap: 20px;
 }
 
 @media (min-width: 640px) {
   .nd-carousel-track {
-    gap: 16px;
+    gap: 20px;
   }
 }
 
@@ -915,23 +958,23 @@ font[style] {
 
 @media (min-width: 1280px) {
   .nd-carousel-track {
-    gap: 24px;
+    gap: 20px;
   }
 }
 
 .nd-carousel-item {
-  flex: 0 0 calc((100% - 12px) / 2);
+  flex: 0 0 100%;
   min-width: 0;
-  max-width: calc((100% - 12px) / 2);
-  width: calc((100% - 12px) / 2);
+  max-width: 100%;
+  width: 100%;
   scroll-snap-align: start;
 }
 
 @media (min-width: 640px) {
   .nd-carousel-item {
-    flex: 0 0 calc((100% - 16px) / 2);
-    max-width: calc((100% - 16px) / 2);
-    width: calc((100% - 16px) / 2);
+    flex: 0 0 calc((100% - 20px) / 2);
+    max-width: calc((100% - 20px) / 2);
+    width: calc((100% - 20px) / 2);
   }
 }
 
@@ -945,9 +988,9 @@ font[style] {
 
 @media (min-width: 1280px) {
   .nd-carousel-item {
-    flex: 0 0 calc((100% - (24px * 3)) / 4);
-    max-width: calc((100% - (24px * 3)) / 4);
-    width: calc((100% - (24px * 3)) / 4);
+    flex: 0 0 calc((100% - (20px * 3)) / 4);
+    max-width: calc((100% - (20px * 3)) / 4);
+    width: calc((100% - (20px * 3)) / 4);
   }
 }
 
@@ -1036,3 +1079,76 @@ font[style] {
     gap: 2rem;
   }
 }
+
+/* News Carousel styles ("NOTIZIE" page order & mouse-wheel scroll) */
+.nd-news-carousel .nd-carousel-item {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 640px) {
+  .nd-news-carousel .nd-carousel-item {
+    flex: 0 0 calc((100% - 20px) / 2) !important;
+    max-width: calc((100% - 20px) / 2) !important;
+    width: calc((100% - 20px) / 2) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nd-news-carousel .nd-carousel-item {
+    flex: 0 0 calc((100% - (20px * 3)) / 4) !important;
+    max-width: calc((100% - (20px * 3)) / 4) !important;
+    width: calc((100% - (20px * 3)) / 4) !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .nd-news-carousel .nd-carousel-item {
+    flex: 0 0 calc((100% - (20px * 3)) / 4) !important;
+    max-width: calc((100% - (20px * 3)) / 4) !important;
+    width: calc((100% - (20px * 3)) / 4) !important;
+  }
+}
+
+.nd-news-carousel .nd-carousel-side-btn {
+  top: 45%;
+}
+
+.nd-news-track {
+  cursor: grab;
+}
+
+.nd-news-track:active {
+  cursor: grabbing;
+}
+
+/* ==========================================================================
+   Swiper JS Integration Styles
+   ========================================================================== */
+.hero-swiper .swiper-slide {
+  pointer-events: none;
+}
+
+.hero-swiper .swiper-slide-active {
+  pointer-events: auto;
+}
+
+.bestsellers-swiper .swiper-slide,
+.news-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.bestsellers-swiper .swiper-slide > .nd-product-card,
+.news-swiper .swiper-slide > a {
+  height: 100%;
+  width: 100%;
+}
+
+.swiper-pagination-bullet-active {
+  background: hsl(var(--primary)) !important;
+}
+

@@ -1,11 +1,13 @@
 <?php
+
 /**
  * Shared markup components – class strings mirror the reference design 1:1.
  */
 if (!defined('ABSPATH')) exit;
 
 /** Theme image URL. */
-function nundia_img($filename) {
+function nundia_img($filename)
+{
     return get_template_directory_uri() . '/assets/images/' . ltrim($filename, '/');
 }
 
@@ -13,7 +15,8 @@ function nundia_img($filename) {
  * Image wrapper identical to the reference (<span wrap><span><img></span></span>).
  * $src may be a URL or an attachment ID.
  */
-function nundia_image($src, $alt = '', $wrap = 'relative w-full', $size = 'large', $eager = false, $fit = 'object-cover') {
+function nundia_image($src, $alt = '', $wrap = 'relative w-full', $size = 'large', $eager = false, $fit = 'object-cover')
+{
     $srcset = '';
     if (is_numeric($src)) {
         $id = (int) $src;
@@ -30,7 +33,8 @@ function nundia_image($src, $alt = '', $wrap = 'relative w-full', $size = 'large
 }
 
 /** Featured image of a post (ID) or a theme fallback. */
-function nundia_post_image($post_id, $alt = null, $wrap = 'relative w-full', $size = 'large', $fallback = '', $fit = 'object-cover') {
+function nundia_post_image($post_id, $alt = null, $wrap = 'relative w-full', $size = 'large', $fallback = '', $fit = 'object-cover')
+{
     $thumb = get_post_thumbnail_id($post_id);
     if (!$thumb && empty($fallback)) return '';
     if ($alt === null) $alt = get_the_title($post_id);
@@ -39,12 +43,14 @@ function nundia_post_image($post_id, $alt = null, $wrap = 'relative w-full', $si
 }
 
 /** "3,80 €" */
-function nundia_price($amount) {
+function nundia_price($amount)
+{
     return number_format((float) $amount, 2, ',', '.') . ' €';
 }
 
 /** Eyebrow line with red/white rule, as in the reference. */
-function nundia_eyebrow($text, $class = 'text-muted-foreground', $rule = 'bg-primary', $center = false) {
+function nundia_eyebrow($text, $class = 'text-muted-foreground', $rule = 'bg-primary', $center = false)
+{
     if (empty($text) && $text !== '0') return '';
     $rule_html = '<span class="h-[2px] w-9 ' . esc_attr($rule) . '" aria-hidden="true"></span>';
     return '<p class="flex items-center ' . ($center ? 'justify-center ' : '') . 'gap-3 text-[10px] uppercase tracking-[0.3em] ' . esc_attr($class) . '">'
@@ -52,11 +58,12 @@ function nundia_eyebrow($text, $class = 'text-muted-foreground', $rule = 'bg-pri
 }
 
 /** Dark photo hero used by interior pages. */
-function nundia_page_hero($hero) {
+function nundia_page_hero($hero)
+{
     if (empty($hero['title']) && empty($hero['image']) && empty($hero['eyebrow']) && empty($hero['subtitle'])) {
         return;
     }
-    ?>
+?>
     <section class="relative overflow-hidden bg-foreground text-white">
         <?php if (!empty($hero['image'])): ?>
             <div class="absolute inset-0" aria-hidden="true">
@@ -64,7 +71,7 @@ function nundia_page_hero($hero) {
                 <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/45"></div>
             </div>
         <?php endif; ?>
-        <div class="container-ed relative flex min-h-[40vh] lg:min-h-[50vh] flex-col justify-end pb-14 pt-32 lg:pb-16">
+        <div class="container-ed relative flex min-h-[70vh] lg:min-h-[70vh] flex-col justify-end pb-14 pt-32 lg:pb-16">
             <?php if (!empty($hero['eyebrow'])): ?>
                 <?php echo nundia_eyebrow($hero['eyebrow'], 'text-white/75', 'bg-white'); ?>
             <?php endif; ?>
@@ -75,17 +82,17 @@ function nundia_page_hero($hero) {
                 <p class="mt-5 max-w-xl text-[15px] leading-relaxed text-white/80"><?php echo esc_html($hero['subtitle']); ?></p>
             <?php endif; ?>
         </div>
-        <div class="absolute inset-x-0 bottom-0 h-[6px] bg-primary" aria-hidden="true"></div>
     </section>
-    <?php
+<?php
 }
 
 /** Hero used by legal / cart / checkout pages. */
-function nundia_light_hero($hero) {
+function nundia_light_hero($hero)
+{
     if (empty($hero['title']) && empty($hero['image']) && empty($hero['eyebrow']) && empty($hero['subtitle'])) {
         return;
     }
-    ?>
+?>
     <section class="relative overflow-hidden bg-foreground text-white">
         <?php if (!empty($hero['image'])): ?>
             <div class="absolute inset-0" aria-hidden="true">
@@ -104,9 +111,8 @@ function nundia_light_hero($hero) {
                 <p class="mt-5 max-w-xl text-[15px] leading-relaxed text-white/80"><?php echo esc_html($hero['subtitle']); ?></p>
             <?php endif; ?>
         </div>
-        <div class="absolute inset-x-0 bottom-0 h-[6px] bg-primary" aria-hidden="true"></div>
     </section>
-    <?php
+<?php
 }
 
 /**
@@ -114,7 +120,8 @@ function nundia_light_hero($hero) {
  * True for the home page and interior pages/archives with a hero section.
  * False for single product, post, and recipe views without a top hero banner.
  */
-function nundia_has_transparent_header() {
+function nundia_has_transparent_header()
+{
     if (is_singular(array('product', 'post', 'recipe'))) {
         return false;
     }
@@ -122,7 +129,8 @@ function nundia_has_transparent_header() {
 }
 
 /** Product card (shop grid, home carousel, related). */
-function nundia_product_card($product, $extra_attrs = '') {
+function nundia_product_card($product, $extra_attrs = '')
+{
     if (is_numeric($product)) $product = wc_get_product($product);
     if (!$product) return;
     $id = $product->get_id();
@@ -134,7 +142,7 @@ function nundia_product_card($product, $extra_attrs = '') {
     // Primary product category
     $cats = wp_get_post_terms($id, 'product_cat', array('fields' => 'names'));
     $cat_name = (!empty($cats) && !is_wp_error($cats)) ? $cats[0] : '';
-    ?>
+?>
     <article class="nd-product-card group" <?php echo $extra_attrs; ?>>
         <a class="nd-product-media" href="<?php echo esc_url($link); ?>" aria-label="<?php echo esc_attr($name); ?>">
             <?php echo nundia_post_image($id, $name, 'relative h-full w-full', 'woocommerce_single'); ?>
@@ -161,7 +169,11 @@ function nundia_product_card($product, $extra_attrs = '') {
                 </div>
                 <button type="button" class="js-add-to-cart nd-product-btn" data-product-id="<?php echo esc_attr($id); ?>" data-label="Aggiungi al carrello" data-done="Aggiunto!" data-check="1" <?php disabled(!$in_stock); ?>>
                     <?php if ($in_stock): ?>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="opacity-95" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="opacity-95" aria-hidden="true">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                            <path d="M3 6h18" />
+                            <path d="M16 10a4 4 0 0 1-8 0" />
+                        </svg>
                         <span>Aggiungi al carrello</span>
                     <?php else: ?>
                         <span>Esaurito</span>
@@ -170,11 +182,12 @@ function nundia_product_card($product, $extra_attrs = '') {
             </div>
         </div>
     </article>
-    <?php
+<?php
 }
 
 /** Supported languages (Google Translate codes) – same set as the reference. */
-function nundia_languages() {
+function nundia_languages()
+{
     return array(
         'it' => array('Italiano', 'it'),
         'en' => array('English', 'gb'),
@@ -187,7 +200,8 @@ function nundia_languages() {
 }
 
 /** Current language from the googtrans cookie ("/it/en"). */
-function nundia_current_lang() {
+function nundia_current_lang()
+{
     $langs = nundia_languages();
     if (!empty($_COOKIE['googtrans']) && preg_match('#^/it/([a-z-]+)$#i', $_COOKIE['googtrans'], $m) && isset($langs[strtolower($m[1])])) {
         return strtolower($m[1]);
@@ -199,10 +213,11 @@ function nundia_current_lang() {
  * Language dropdown: shows only the language in use; the others open in a menu.
  * $variant: 'light' (on transparent/dark header) or 'dark' (on white).
  */
-function nundia_language_switcher($id = 'lang') {
+function nundia_language_switcher($id = 'lang')
+{
     $langs = nundia_languages();
     $cur = nundia_current_lang();
-    ?>
+?>
     <div class="nd-lang relative notranslate" data-lang-switcher translate="no">
         <button type="button" class="nd-lang-btn flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] opacity-80 transition-opacity hover:opacity-100" aria-haspopup="listbox" aria-expanded="false" aria-controls="<?php echo esc_attr($id); ?>-menu" aria-label="Lingua / Language">
             <span class="nd-flag h-[18px] w-[18px] overflow-hidden rounded-full"><img src="https://flagcdn.com/w40/<?php echo esc_attr($langs[$cur][1]); ?>.png" alt="" class="h-full w-full object-cover"></span>
@@ -220,11 +235,12 @@ function nundia_language_switcher($id = 'lang') {
             <?php endforeach; ?>
         </ul>
     </div>
-    <?php
+<?php
 }
 
 /** Primary navigation items (WP menu "Menu Principale" or fallback in the client's order). */
-function nundia_nav_items() {
+function nundia_nav_items()
+{
     $items = array();
     $locations = get_nav_menu_locations();
     if (!empty($locations['primary'])) {
@@ -236,16 +252,25 @@ function nundia_nav_items() {
         }
     }
     if (empty($items)) {
-        foreach (array(
-            array('Home', '/'), array('Chi siamo', '/chi-siamo/'), array('Notizie', '/journal/'), array('Ricette', '/ricette/'),
-            array('B2B', '/b2b/'), array('Shop', '/shop/'), array('FAQ', '/faq/'), array('Contatti', '/contatti/'),
-        ) as $i) $items[] = array('title' => $i[0], 'url' => home_url($i[1]));
+        foreach (
+            array(
+                array('Home', '/'),
+                array('Chi siamo', '/chi-siamo/'),
+                array('Notizie', '/journal/'),
+                array('Ricette', '/ricette/'),
+                array('B2B', '/b2b/'),
+                array('Shop', '/shop/'),
+                array('FAQ', '/faq/'),
+                array('Contatti', '/contatti/'),
+            ) as $i
+        ) $items[] = array('title' => $i[0], 'url' => home_url($i[1]));
     }
     return $items;
 }
 
 /** Is a nav URL the current section? */
-function nundia_is_current($url) {
+function nundia_is_current($url)
+{
     $path = trim((string) wp_parse_url($url, PHP_URL_PATH), '/');
     $req = trim((string) wp_parse_url(add_query_arg(array()), PHP_URL_PATH), '/');
     $home = trim((string) wp_parse_url(home_url('/'), PHP_URL_PATH), '/');

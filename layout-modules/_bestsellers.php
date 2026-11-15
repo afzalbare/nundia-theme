@@ -48,17 +48,19 @@ $shop_url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('sh
             <?php endif; ?>
 
             <div class="relative mt-8">
-                <button type="button" data-dir="-1" aria-label="Prodotti precedenti" class="nd-carousel-btn nd-carousel-side-btn nd-carousel-side-prev">
+                <button type="button" aria-label="Prodotti precedenti" class="nd-carousel-side-btn nd-carousel-side-prev nd-bestsellers-prev">
                     <?php echo nundia_icon('chevron-left', 'h-5 w-5', 2.4); ?>
                 </button>
 
-                <div class="nd-carousel-track no-scrollbar flex snap-x snap-mandatory overflow-x-auto py-5 px-1 scroll-smooth">
-                    <?php foreach ($featured as $p): ?>
-                        <div class="nd-carousel-item"><?php nundia_product_card($p); ?></div>
-                    <?php endforeach; ?>
+                <div class="swiper bestsellers-swiper py-5 px-1 overflow-hidden">
+                    <div class="swiper-wrapper">
+                        <?php foreach ($featured as $p): ?>
+                            <div class="swiper-slide h-auto flex flex-col"><?php nundia_product_card($p); ?></div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
 
-                <button type="button" data-dir="1" aria-label="Prodotti successivi" class="nd-carousel-btn nd-carousel-side-btn nd-carousel-side-next">
+                <button type="button" aria-label="Prodotti successivi" class="nd-carousel-side-btn nd-carousel-side-next nd-bestsellers-next">
                     <?php echo nundia_icon('chevron-right', 'h-5 w-5', 2.4); ?>
                 </button>
             </div>

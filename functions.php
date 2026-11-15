@@ -49,6 +49,29 @@ function nundia_theme_setup() {
 }
 add_action('after_setup_theme', 'nundia_theme_setup');
 
+/** Ensure dedicated 'Richiesta commerciale' page exists in WordPress */
+function nundia_ensure_richiesta_commerciale_page() {
+    $slug = 'richiesta-commerciale';
+    $page = get_page_by_path($slug);
+    if (!$page) {
+        wp_insert_post(array(
+            'post_title'     => 'Richiesta commerciale',
+            'post_name'      => $slug,
+            'post_status'    => 'publish',
+            'post_type'      => 'page',
+            'page_template'  => 'page-templates/page-richiesta-commerciale.php',
+        ));
+    }
+}
+add_action('init', 'nundia_ensure_richiesta_commerciale_page');
+
+add_action('template_redirect', function () {
+    if (is_page('richieste-commerciali')) {
+        wp_redirect(home_url('/richiesta-commerciale/'), 301);
+        exit;
+    }
+});
+
 /* ------------------------------------------------------------------ *
  * Styles & Scripts (Maintains 100% exact design & typography)
  * ------------------------------------------------------------------ */
@@ -59,13 +82,23 @@ function nundia_enqueue_scripts() {
     // Arabic / Japanese fonts (Latin text uses Arial or Calibri – client request).
     wp_enqueue_style('nundia-google-fonts', 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap', array(), null);
     
+    // Swiper CSS (Official Swiper 11.1.4 bundle)
+    if (file_exists($dir . '/_/css/swiper-bundle.min.css')) {
+        wp_enqueue_style('swiper-css', $uri . '/_/css/swiper-bundle.min.css', array(), '11.1.4');
+    }
+
     // Core CSS (Tailwind CSS compiled + Custom styles)
     wp_enqueue_style('nundia-style', $uri . '/_/css/nundia.min.css', array(), filemtime($dir . '/_/css/nundia.min.css'));
     wp_enqueue_style('nundia-custom-css', $uri . '/_/css/custom.css', array('nundia-style'), filemtime($dir . '/_/css/custom.css'));
     wp_add_inline_style('nundia-custom-css', ':root{--font-family:' . nundia_font_stack(nd_opt('site_font')) . ';}');
 
     // Scripts
-    wp_enqueue_script('nundia-main-js', $uri . '/_/js/main.js', array(), filemtime($dir . '/_/js/main.js'), true);
+    $main_deps = array();
+    if (file_exists($dir . '/_/js/swiper-bundle.min.js')) {
+        wp_enqueue_script('swiper-bundle', $uri . '/_/js/swiper-bundle.min.js', array(), '11.1.4', true);
+        $main_deps[] = 'swiper-bundle';
+    }
+    wp_enqueue_script('nundia-main-js', $uri . '/_/js/main.js', $main_deps, filemtime($dir . '/_/js/main.js'), true);
     wp_localize_script('nundia-main-js', 'nundia_ajax', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('nundia_nonce'),
@@ -282,11 +315,13 @@ function nundia_ajax_b2b_handler() {
     $email = sanitize_email(nundia_post_field('email'));
     $company = nundia_post_field('company');
     $name = nundia_post_field('name');
-    if (!$company || !$name || !is_email($email)) {
+    $vat = nundia_post_field('vat');
+    $phone = nundia_post_field('phone');
+    if (!$company || !$name || !is_email($email) || !$vat || !$phone) {
         wp_send_json_error(array('message' => 'Compila i campi obbligatori.'));
     }
     $lines = array(
-        'Azienda' => $company, 'Nome' => $name, 'Email' => $email, 'Telefono' => nundia_post_field('phone'),
+        'Azienda' => $company, 'Partita IVA (VAT)' => $vat, 'Referente' => $name, 'Email' => $email, 'Telefono' => $phone,
         'Paese' => nundia_post_field('country'), 'Tipo di attività' => nundia_post_field('business_type'),
         'Prodotti di interesse' => nundia_post_field('products'), 'Volume stimato' => nundia_post_field('volume'),
         'Messaggio' => nundia_post_field('message', true),

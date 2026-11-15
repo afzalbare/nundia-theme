@@ -14,8 +14,6 @@ $items = array(
     array('mail', 'Fornitori', nd_opt('email_suppliers'), 'mailto:' . nd_opt('email_suppliers')),
     array('phone', 'Telefono', nd_opt('phone'), 'tel:' . $tel(nd_opt('phone'))),
     array('message-circle', 'WhatsApp (dall’estero)', nd_opt('mobile'), 'https://wa.me/' . ltrim($tel(nd_opt('mobile')), '+')),
-    array('map-pin', 'Sede legale', nd_opt('address'), ''),
-    array('receipt', 'P. IVA', nd_opt('vat'), ''),
 );
 
 $valid_items = array_filter($items, function($it) {
@@ -31,36 +29,31 @@ foreach (array('instagram' => 'Instagram', 'facebook' => 'Facebook', 'linkedin' 
     }
 }
 $has_social = ($social_label || $social_text || !empty($social_links));
-
-$b2b_eyebrow = nd('contact_b2b_eyebrow');
-$b2b_body = nd('contact_b2b_body');
-$b2b_link = nd('contact_b2b_link');
-$has_b2b_card = ($b2b_eyebrow || $b2b_body || $b2b_link);
 ?>
-<section class="container-ed py-14 lg:py-20">
-    <div class="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+<section class="container-ed py-10 lg:py-14">
+    <div class="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 items-start">
         <div class="reveal">
             <?php if (!empty($valid_items)): ?>
-                <div class="space-y-6">
+                <div class="space-y-4 sm:space-y-5">
                     <?php foreach ($valid_items as $it): ?>
-                        <div class="border-t border-border pt-5">
+                        <div>
                             <p class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"><?php echo nundia_icon($it[0], 'h-3.5 w-3.5', 1.5); ?><?php echo esc_html($it[1]); ?></p>
                             <?php if ($it[3]): ?>
-                                <a href="<?php echo esc_url($it[3]); ?>" class="mt-2 block text-[15px] hover:text-primary"><?php echo esc_html($it[2]); ?></a>
+                                <a href="<?php echo esc_url($it[3]); ?>" class="mt-1 block text-[15px] font-medium text-foreground transition-colors hover:text-primary"><?php echo esc_html($it[2]); ?></a>
                             <?php else: ?>
-                                <p class="mt-2 text-[15px]"><?php echo esc_html($it[2]); ?></p>
+                                <p class="mt-1 text-[15px] font-medium text-foreground"><?php echo esc_html($it[2]); ?></p>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
 
-            <?php if ($has_social): ?>
-                <div class="mt-10 border-t border-border pt-6">
-                    <?php if ($social_label): ?>
+            <?php if ($has_social && $social_text !== 'Da definire'): ?>
+                <div class="mt-8 pt-2">
+                    <?php if ($social_label && $social_label !== 'Contatti'): ?>
                         <p class="eyebrow"><?php echo esc_html($social_label); ?></p>
                     <?php endif; ?>
-                    <div class="mt-4 flex flex-wrap gap-4 text-[12.5px] text-foreground/75">
+                    <div class="mt-3 flex flex-wrap gap-4 text-[12.5px] text-foreground/75">
                         <?php if ($social_text): ?>
                             <span class="italic text-muted-foreground"><?php echo esc_html($social_text); ?></span>
                         <?php else: foreach ($social_links as $k => $data): ?>
@@ -69,25 +62,9 @@ $has_b2b_card = ($b2b_eyebrow || $b2b_body || $b2b_link);
                     </div>
                 </div>
             <?php endif; ?>
-
-            <?php if ($has_b2b_card): ?>
-                <div class="mt-10 bg-foreground p-6 text-white">
-                    <?php if ($b2b_eyebrow): ?>
-                        <p class="eyebrow text-white/55"><?php echo esc_html($b2b_eyebrow); ?></p>
-                    <?php endif; ?>
-                    <?php if ($b2b_body): ?>
-                        <p class="mt-3 text-[14px] leading-relaxed text-white/70"><?php echo esc_html($b2b_body); ?></p>
-                    <?php endif; ?>
-                    <?php if ($b2b_link): ?>
-                        <a class="group mt-5 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-primary" href="<?php echo esc_url(home_url('/b2b/')); ?>">
-                            <?php echo esc_html($b2b_link); ?><?php echo nundia_icon('arrow-right', 'h-3.5 w-3.5 transition-transform group-hover:translate-x-1', 1.6); ?>
-                        </a>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
         </div>
         <div class="reveal" style="transition-delay: 120ms;">
-            <form class="js-ajax-form border border-border bg-white p-6 sm:p-8" data-action="nundia_ajax_contact">
+            <form class="js-ajax-form" data-action="nundia_ajax_contact">
                 <div class="grid gap-4 sm:grid-cols-2">
                     <label class="block"><span class="<?php echo $label; ?>">Nome e cognome *</span><input name="name" class="<?php echo $input; ?>" required autocomplete="name"></label>
                     <label class="block"><span class="<?php echo $label; ?>">Email *</span><input name="email" type="email" class="<?php echo $input; ?>" required autocomplete="email"></label>
