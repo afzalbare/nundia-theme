@@ -6,12 +6,13 @@
  */
 if (!defined('ABSPATH')) exit;
 
-$is_home    = is_front_page();
-$cart_count = nundia_cart_count();
-$nav_items  = nundia_nav_items();
-$brand      = nd_opt('brand_name');
-$slogan     = nd_opt('brand_slogan');
-$group      = nd_opt('brand_group');
+$is_home        = is_front_page();
+$is_transparent = function_exists('nundia_has_transparent_header') ? nundia_has_transparent_header() : true;
+$cart_count     = nundia_cart_count();
+$nav_items      = nundia_nav_items();
+$brand          = nd_opt('brand_name');
+$slogan         = nd_opt('brand_slogan');
+$group          = nd_opt('brand_group');
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
@@ -26,7 +27,7 @@ $group      = nd_opt('brand_group');
 <?php wp_body_open(); ?>
 <div class="flex min-h-screen flex-col bg-background">
 
-<header class="nd-header fixed inset-x-0 top-0 z-50 transition-all duration-500 <?php echo $is_home ? 'text-white' : 'border-b border-border bg-background/92 text-foreground backdrop-blur-xl'; ?>" data-transparent="<?php echo $is_home ? 'true' : 'false'; ?>">
+<header class="nd-header fixed inset-x-0 top-0 z-50 transition-all duration-500 <?php echo $is_transparent ? 'text-white' : 'border-b border-border bg-background/92 text-foreground backdrop-blur-xl'; ?>" data-transparent="<?php echo $is_transparent ? 'true' : 'false'; ?>">
     <div class="nd-header-row container-ed flex items-center justify-between gap-3 lg:gap-4 xl:gap-6">
         <a class="nd-logo shrink-0 items-center" href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php echo esc_attr($brand . ' – ' . $slogan); ?> – home">
             <?php
@@ -108,7 +109,7 @@ $group      = nd_opt('brand_group');
     </div>
 </header>
 
-<?php if (!$is_home): ?>
+<?php if (!$is_transparent): ?>
     <div aria-hidden="true" class="nd-header-spacer"></div>
 <?php endif; ?>
 

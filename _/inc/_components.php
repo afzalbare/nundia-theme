@@ -80,20 +80,45 @@ function nundia_page_hero($hero) {
     <?php
 }
 
-/** Light hero used by legal / cart / checkout pages. */
+/** Hero used by legal / cart / checkout pages. */
 function nundia_light_hero($hero) {
+    if (empty($hero['title']) && empty($hero['image']) && empty($hero['eyebrow']) && empty($hero['subtitle'])) {
+        return;
+    }
     ?>
-    <section class="relative overflow-hidden border-b border-border bg-white">
-        <div class="container-ed py-14 lg:py-20">
-            <?php echo nundia_eyebrow($hero['eyebrow']); ?>
-            <h1 class="mt-5 max-w-4xl text-[clamp(2.1rem,5vw,3.7rem)] leading-[1.02]"><?php echo esc_html($hero['title']); ?></h1>
+    <section class="relative overflow-hidden bg-foreground text-white">
+        <?php if (!empty($hero['image'])): ?>
+            <div class="absolute inset-0" aria-hidden="true">
+                <?php echo nundia_image($hero['image'], '', 'relative h-full w-full', 'full', true); ?>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/45"></div>
+            </div>
+        <?php endif; ?>
+        <div class="container-ed relative flex min-h-[35vh] lg:min-h-[42vh] flex-col justify-end pb-14 pt-32 lg:pb-16">
+            <?php if (!empty($hero['eyebrow'])): ?>
+                <?php echo nundia_eyebrow($hero['eyebrow'], 'text-white/75', 'bg-white'); ?>
+            <?php endif; ?>
+            <?php if (!empty($hero['title'])): ?>
+                <h1 class="mt-5 max-w-4xl text-[clamp(2.3rem,5.6vw,4.2rem)] leading-[0.98] text-white"><?php echo esc_html($hero['title']); ?></h1>
+            <?php endif; ?>
             <?php if (!empty($hero['subtitle'])): ?>
-                <p class="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground"><?php echo esc_html($hero['subtitle']); ?></p>
+                <p class="mt-5 max-w-xl text-[15px] leading-relaxed text-white/80"><?php echo esc_html($hero['subtitle']); ?></p>
             <?php endif; ?>
         </div>
         <div class="absolute inset-x-0 bottom-0 h-[6px] bg-primary" aria-hidden="true"></div>
     </section>
     <?php
+}
+
+/**
+ * Does this view use a transparent hero header like the home page?
+ * True for the home page and interior pages/archives with a hero section.
+ * False for single product, post, and recipe views without a top hero banner.
+ */
+function nundia_has_transparent_header() {
+    if (is_singular(array('product', 'post', 'recipe'))) {
+        return false;
+    }
+    return true;
 }
 
 /** Product card (shop grid, home carousel, related). */
