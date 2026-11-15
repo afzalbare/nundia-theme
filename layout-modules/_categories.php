@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Layout Module: Categories
  */
@@ -25,14 +26,14 @@ $title = nd('home_cat_title');
 <section class="bg-background py-16 lg:py-24">
     <div class="container-ed">
         <?php if ($eyebrow || $title): ?>
-        <div class="reveal text-center">
-            <?php if ($eyebrow): ?>
-                <?php echo nundia_eyebrow($eyebrow, 'text-muted-foreground', 'bg-primary', true); ?>
-            <?php endif; ?>
-            <?php if ($title): ?>
-                <h2 class="mt-4 text-[clamp(1.9rem,4vw,2.9rem)] leading-[1.1] text-foreground"><?php echo esc_html($title); ?></h2>
-            <?php endif; ?>
-        </div>
+            <div class="reveal text-center">
+                <?php if ($eyebrow): ?>
+                    <?php echo nundia_eyebrow($eyebrow, 'text-muted-foreground', 'bg-primary', true); ?>
+                <?php endif; ?>
+                <?php if ($title): ?>
+                    <h2 class="mt-4 text-[clamp(1.9rem,4vw,2.9rem)] leading-[1.1] text-foreground"><?php echo esc_html($title); ?></h2>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
         <div class="mt-12 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-x-5 sm:gap-x-7 gap-y-8 sm:gap-y-10 nd-categories-grid">
             <?php foreach ($cats as $i => $cat):
@@ -40,7 +41,7 @@ $title = nd('home_cat_title');
                 $shop_url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/shop/');
                 $cat_link = add_query_arg('cat', $cat->slug, $shop_url);
             ?>
-                <div class="reveal text-center"<?php echo $i ? ' style="transition-delay: ' . (70 * $i) . 'ms;"' : ''; ?>>
+                <div class="reveal text-center" <?php echo $i ? ' style="transition-delay: ' . (70 * $i) . 'ms;"' : ''; ?>>
                     <a class="group block" href="<?php echo esc_url($cat_link); ?>">
                         <?php if ($thumb): ?>
                             <div class="overflow-hidden rounded-md">
