@@ -36,9 +36,22 @@ $group          = nd_opt('brand_group');
                 <a class="nd-logo shrink-0 items-center" href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php echo esc_attr($brand . ' – ' . $slogan); ?> – home">
                     <?php
                     $logo_light = nd_opt('header_logo_light');
-                    $logo_dark = nd_opt('header_logo_dark');
-                    if (!$logo_light) $logo_light = nundia_img('nundia-logo-light.png') . '?v=' . filemtime(get_template_directory() . '/assets/images/nundia-logo-light.png');
-                    if (!$logo_dark) $logo_dark = nundia_img('nundia-logo-full.png') . '?v=' . filemtime(get_template_directory() . '/assets/images/nundia-logo-full.png');
+                    $logo_dark  = nd_opt('header_logo_dark');
+
+                    // If user set one logo in Site Settings, use it for both states if the other is empty
+                    if ($logo_light && !$logo_dark) {
+                        $logo_dark = $logo_light;
+                    } elseif ($logo_dark && !$logo_light) {
+                        $logo_light = $logo_dark;
+                    }
+
+                    // Default fallback only if not set in Site Settings
+                    if (!$logo_light) {
+                        $logo_light = nundia_img('nundia-logo-light.png') . '?v=' . filemtime(get_template_directory() . '/assets/images/nundia-logo-light.png');
+                    }
+                    if (!$logo_dark) {
+                        $logo_dark = nundia_img('nundia-logo-full.png') . '?v=' . filemtime(get_template_directory() . '/assets/images/nundia-logo-full.png');
+                    }
                     ?>
                     <img src="<?php echo esc_url($logo_light); ?>" alt="<?php echo esc_attr($brand); ?>" class="nd-logo-light" width="120" height="120">
                     <img src="<?php echo esc_url($logo_dark); ?>" alt="<?php echo esc_attr($brand); ?>" class="nd-logo-dark" width="120" height="120">

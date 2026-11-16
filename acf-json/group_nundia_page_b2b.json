@@ -297,6 +297,55 @@
             "append": "",
             "_name": "b2b_form_sub",
             "_valid": 1
+        },
+        {
+            "key": "field_nd_b2b_b2b_banner_eyebrow",
+            "label": "Banda nera – etichetta",
+            "name": "b2b_banner_eyebrow",
+            "type": "text",
+            "default_value": "B2B",
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_nd_b2b_b2b_banner_heading",
+            "label": "Banda nera – testo",
+            "name": "b2b_banner_heading",
+            "type": "textarea",
+            "default_value": "Per GDO, HO.RE.CA. e distribuzione internazionale utilizza il modulo dedicato.",
+            "rows": 3,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_nd_b2b_b2b_banner_cta_label",
+            "label": "Banda nera – pulsante testo",
+            "name": "b2b_banner_cta_label",
+            "type": "text",
+            "default_value": "Richiesta commerciale",
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_nd_b2b_b2b_banner_cta_link",
+            "label": "Banda nera – pulsante link",
+            "name": "b2b_banner_cta_link",
+            "type": "text",
+            "default_value": "/richiesta-commerciale/",
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
         }
     ],
     "location": [
@@ -305,6 +354,13 @@
                 "param": "page_template",
                 "operator": "==",
                 "value": "page-b2b.php"
+            }
+        ],
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "page-templates/page-b2b.php"
             }
         ],
         [

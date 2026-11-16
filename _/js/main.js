@@ -226,6 +226,18 @@
       val.textContent = q;
       var add = $('.js-add-to-cart', wrap);
       if (add) add.dataset.quantity = q;
+
+      // Dynamically update product price when quantity changes
+      var priceEl = $('.js-single-price');
+      if (priceEl && priceEl.dataset.unitPrice) {
+        var unitPrice = parseFloat(priceEl.dataset.unitPrice) || 0;
+        var total = unitPrice * q;
+        try {
+          priceEl.textContent = new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total) + ' €';
+        } catch (err) {
+          priceEl.textContent = total.toFixed(2).replace('.', ',') + ' €';
+        }
+      }
     });
   });
   var CHECK = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check h-4 w-4" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>';

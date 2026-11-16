@@ -46,7 +46,10 @@ while (have_posts()): the_post();
             <div class="lg:pt-6">
                 <?php if ($unit): ?><p class="eyebrow"><?php echo esc_html($unit); ?></p><?php endif; ?>
                 <h1 class="mt-3 text-[clamp(1.9rem,3.6vw,2.9rem)] leading-[1.05]"><?php the_title(); ?></h1>
-                <p class="mt-4 text-xl tabular-nums text-primary"><?php echo esc_html(nundia_price($product->get_price())); ?></p>
+                <div class="mt-4 flex flex-wrap items-baseline gap-2.5">
+                    <span class="js-single-price text-2xl font-bold tabular-nums text-primary" data-unit-price="<?php echo esc_attr($product->get_price()); ?>"><?php echo esc_html(nundia_price($product->get_price())); ?></span>
+                    <span class="text-[12px] font-medium text-muted-foreground">(IVA inclusa) - escluse spese di trasporto</span>
+                </div>
                 <?php if ($product->get_short_description()): ?>
                     <p class="mt-5 max-w-lg text-[15px] leading-relaxed text-muted-foreground"><?php echo esc_html(wp_strip_all_tags($product->get_short_description())); ?></p>
                 <?php endif; ?>
@@ -55,10 +58,10 @@ while (have_posts()): the_post();
                     <?php echo $in_stock ? 'Disponibile' : 'Non disponibile'; ?>
                 </div>
                 <div class="js-qty-wrap mt-7 flex flex-wrap items-center gap-3">
-                    <div class="flex items-center border border-border">
-                        <button type="button" class="js-qty flex h-12 w-11 items-center justify-center transition-colors hover:bg-secondary" data-step="-1" aria-label="-"><?php echo nundia_icon('minus', 'h-3.5 w-3.5', 2); ?></button>
-                        <span class="js-qty-value w-10 text-center text-sm tabular-nums">1</span>
-                        <button type="button" class="js-qty flex h-12 w-11 items-center justify-center transition-colors hover:bg-secondary" data-step="1" aria-label="+"><?php echo nundia_icon('plus', 'h-3.5 w-3.5', 2); ?></button>
+                    <div class="flex items-center rounded-sm bg-muted/60">
+                        <button type="button" class="js-qty flex h-12 w-11 items-center justify-center transition-colors hover:bg-white" data-step="-1" aria-label="-"><?php echo nundia_icon('minus', 'h-3.5 w-3.5', 2); ?></button>
+                        <span class="js-qty-value w-10 text-center text-sm font-medium tabular-nums">1</span>
+                        <button type="button" class="js-qty flex h-12 w-11 items-center justify-center transition-colors hover:bg-white" data-step="1" aria-label="+"><?php echo nundia_icon('plus', 'h-3.5 w-3.5', 2); ?></button>
                     </div>
                     <button type="button" class="js-add-to-cart inline-flex h-12 flex-1 items-center justify-center gap-2 bg-primary px-8 text-[11px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground sm:flex-none" data-product-id="<?php echo esc_attr($id); ?>" data-label="Aggiungi al carrello" data-done="Aggiunto al carrello" data-check="1" <?php disabled(!$in_stock); ?>>
                         Aggiungi al carrello

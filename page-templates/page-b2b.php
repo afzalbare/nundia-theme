@@ -41,25 +41,40 @@ if (!empty($b2b_cards)): ?>
 </section>
 <?php endif; ?>
 
+<?php
+$banner_eyebrow = nd('b2b_banner_eyebrow') ?: 'B2B';
+$banner_heading = nd('b2b_banner_heading') ?: 'Per GDO, HO.RE.CA. e distribuzione internazionale utilizza il modulo dedicato.';
+$banner_cta     = nd('b2b_banner_cta_label') ?: 'Richiesta commerciale';
+$banner_link    = nd('b2b_banner_cta_link') ?: home_url('/richiesta-commerciale/');
+if ($banner_link && strpos($banner_link, 'http') !== 0) {
+    $banner_link = home_url($banner_link);
+}
+?>
 <!-- Full-Width Black Band (replaces the contact form, per client request) -->
 <section class="bg-foreground text-white py-14 lg:py-20">
     <div class="container-ed">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
-            <div class="max-w-2xl reveal">
+            <div class="max-w-4xl reveal">
+                <?php if ($banner_eyebrow): ?>
                 <p class="eyebrow text-white/70 mb-3 flex items-center gap-3">
                     <span class="h-[2px] w-9 bg-primary" aria-hidden="true"></span>
-                    <span>B2B</span>
+                    <span><?php echo esc_html($banner_eyebrow); ?></span>
                 </p>
+                <?php endif; ?>
+                <?php if ($banner_heading): ?>
                 <p class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-snug">
-                    Per GDO, HO.RE.CA. e distribuzione internazionale utilizza il modulo dedicato.
+                    <?php echo esc_html($banner_heading); ?>
                 </p>
+                <?php endif; ?>
             </div>
+            <?php if ($banner_cta): ?>
             <div class="shrink-0 reveal" style="transition-delay: 90ms;">
-                <a class="group inline-flex min-h-12 items-center justify-center gap-3 bg-primary px-8 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:bg-primary/90 shadow-lg" href="<?php echo esc_url(home_url('/richiesta-commerciale/')); ?>">
-                    <span>Richiesta commerciale</span>
+                <a class="group inline-flex min-h-12 items-center justify-center gap-3 bg-primary px-8 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:bg-primary/90 shadow-lg" href="<?php echo esc_url($banner_link); ?>">
+                    <span><?php echo esc_html($banner_cta); ?></span>
                     <?php echo nundia_icon('arrow-right', 'h-4 w-4 transition-transform group-hover:translate-x-1', 1.8); ?>
                 </a>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>

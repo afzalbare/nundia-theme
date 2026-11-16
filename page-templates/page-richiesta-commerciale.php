@@ -4,26 +4,30 @@
  */
 get_header();
 $pid = get_queried_object_id();
-$hero = nd_hero('b2b', $pid);
+$hero = nd_hero('richiesta-commerciale', $pid);
 if (empty($hero['title'])) {
     $hero['title'] = 'Richiesta commerciale';
 }
 if (empty($hero['eyebrow'])) {
     $hero['eyebrow'] = 'B2B';
 }
+if (empty($hero['image'])) {
+    $b2b_hero = nd_hero('b2b');
+    $hero['image'] = !empty($b2b_hero['image']) ? $b2b_hero['image'] : '';
+}
 nundia_page_hero($hero);
 
 $input = 'mt-1.5 w-full border border-input bg-white px-3 py-2.5 text-[14px] outline-none transition-colors focus:border-foreground';
 $label = 'text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground';
 
-$eyebrow = nd('b2b_form_eyebrow') ?: 'Richiesta commerciale';
-$heading = nd('b2b_form_heading') ?: 'Parliamo del tuo assortimento';
-$intro = nd('b2b_form_intro') ?: 'Indica la tua attività e i prodotti di interesse: ti risponderemo con condizioni, formati disponibili e tempi di consegna.';
-$bullets = nd_lines(nd('b2b_bullets'));
+$eyebrow = nd('rc_eyebrow') ?: (nd('b2b_form_eyebrow') ?: 'Richiesta commerciale');
+$heading = nd('rc_heading') ?: (nd('b2b_form_heading') ?: 'Parliamo del tuo assortimento');
+$intro = nd('rc_intro') ?: (nd('b2b_form_intro') ?: 'Indica la tua attività e i prodotti di interesse: ti risponderemo con condizioni, formati disponibili e tempi di consegna.');
+$bullets = nd_lines(nd('rc_bullets')) ?: nd_lines(nd('b2b_bullets'));
 $email_orders = nd_opt('email_orders');
 $email_suppliers = nd_opt('email_suppliers');
-$form_title = nd('b2b_form_title') ?: 'Richiesta commerciale';
-$form_sub = nd('b2b_form_sub') ?: 'Rispondiamo alle richieste commerciali entro pochi giorni lavorativi.';
+$form_title = nd('rc_form_title') ?: (nd('b2b_form_title') ?: 'Richiesta commerciale');
+$form_sub = nd('rc_form_sub') ?: (nd('b2b_form_sub') ?: 'Rispondiamo alle richieste commerciali entro pochi giorni lavorativi.');
 ?>
 <section class="container-ed py-10 lg:py-16" id="richiesta">
     <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14 items-start">

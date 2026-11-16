@@ -9,25 +9,62 @@ if (!defined('ABSPATH')) exit;
 
 $arrow = nundia_icon('arrow-right', 'h-3 w-3 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100', 1.6);
 $link_class = 'group inline-flex items-center gap-1.5 text-sm text-white/85 transition-colors hover:text-white';
-$cols = array(
-    'Esplora' => array(
+$cols_defaults = array(
+    'footer_col_1' => array('Esplora', array(
         array('Shop', '/shop/'),
-        array('Notizie', '/journal/'),
         array('Ricette', '/ricette/'),
         array('FAQ', '/faq/'),
-    ),
-    'La maison' => array(
+        array('Diventa Partner', '/diventa-partner/'),
+    )),
+    'footer_col_2' => array('La maison', array(
         array('Chi siamo', '/chi-siamo/'),
         array('B2B', '/b2b/'),
         array('Contatti', '/contatti/'),
-    ),
-    'Informazioni legali' => array(
+    )),
+    'footer_col_3' => array('Informazioni legali', array(
         array('Privacy policy', '/privacy/'),
         array('Cookie policy', '/cookie-policy/'),
         array('Termini e condizioni', '/termini/'),
         array('Spedizioni e resi', '/spedizioni-e-resi/'),
-    ),
+    )),
 );
+
+$footer_cols = array();
+$nav_locs = get_nav_menu_locations();
+foreach ($cols_defaults as $loc => $def) {
+    list($def_title, $def_items) = $def;
+    if (!empty($nav_locs[$loc])) {
+        $menu_obj = wp_get_nav_menu_object($nav_locs[$loc]);
+        $menu_items = wp_get_nav_menu_items($nav_locs[$loc]);
+        if (!empty($menu_items)) {
+            $links = array();
+            foreach ($menu_items as $mi) {
+                if ((int) $mi->menu_item_parent === 0) {
+                    if (stripos($mi->title, 'Notizie') !== false || stripos($mi->url, '/journal') !== false) {
+                        continue;
+                    }
+                    $links[] = array('label' => $mi->title, 'url' => $mi->url);
+                }
+            }
+            $footer_cols[] = array(
+                'title'    => $menu_obj ? $menu_obj->name : $def_title,
+                'links'    => $links,
+                'is_legal' => ($loc === 'footer_col_3'),
+            );
+            continue;
+        }
+    }
+    $links = array();
+    foreach ($def_items as $it) {
+        $links[] = array('label' => $it[0], 'url' => home_url($it[1]));
+    }
+    $footer_cols[] = array(
+        'title'    => $def_title,
+        'links'    => $links,
+        'is_legal' => ($loc === 'footer_col_3'),
+    );
+}
+
 $socials = array('instagram' => 'Instagram', 'facebook' => 'Facebook', 'linkedin' => 'LinkedIn');
 ?>
 </main>
@@ -38,17 +75,16 @@ $socials = array('instagram' => 'Instagram', 'facebook' => 'Facebook', 'linkedin
             <div>
                 <?php
                 $footer_logo = nd_opt('footer_logo');
-                if (!$footer_logo) $footer_logo = nundia_img('nundia-footer-logo.png') . '?v=' . filemtime(get_template_directory() . '/assets/images/nundia-footer-logo.png');
+                if (!$footer_logo) {
+                    $footer_logo = nundia_img('nundia-logo-light.png') . '?v=' . filemtime(get_template_directory() . '/assets/images/nundia-logo-light.png');
+                }
                 $brand_name = nd_opt('brand_name') ?: get_bloginfo('name');
-                $brand_parts = array_filter(array($brand_name, nd_opt('brand_slogan'), nd_opt('brand_group')));
+                $brand_parts = array_filter(array($brand_name, nd_opt('brand_slogan')));
                 $brand_alt = implode(' – ', $brand_parts);
                 ?>
                 <a class="nd-footer-logo inline-block" aria-label="<?php echo esc_attr($brand_name); ?> – home" href="<?php echo esc_url(home_url('/')); ?>">
-                    <img src="<?php echo esc_url($footer_logo); ?>" alt="<?php echo esc_attr($brand_alt); ?>" width="789" height="878" loading="lazy">
+                    <img src="<?php echo esc_url($footer_logo); ?>" alt="<?php echo esc_attr($brand_alt); ?>" width="789" height="779" loading="lazy">
                 </a>
-                <?php if ($brand_intro = nd_opt('brand_intro')): ?>
-                    <p class="mt-2.5 max-w-sm text-base leading-snug text-white/75"><?php echo esc_html($brand_intro); ?></p>
-                <?php endif; ?>
                 <?php
                 $active_socials = array();
                 foreach ($socials as $key => $label) {
@@ -68,14 +104,14 @@ $socials = array('instagram' => 'Instagram', 'facebook' => 'Facebook', 'linkedin
                 <?php endif; ?>
             </div>
             <div class="nd-footer-links grid gap-6 sm:grid-cols-3 lg:self-center">
-                <?php foreach ($cols as $title => $links): ?>
+                <?php foreach ($footer_cols as $col): ?>
                     <div>
-                        <p class="text-sm uppercase tracking-[0.25em] text-white font-medium"><?php echo esc_html($title); ?></p>
+                        <p class="text-sm uppercase tracking-[0.25em] text-white font-medium"><?php echo esc_html($col['title']); ?></p>
                         <ul class="mt-2 space-y-1">
-                            <?php foreach ($links as $l): ?>
-                                <li><a class="<?php echo $link_class; ?>" href="<?php echo esc_url(home_url($l[1])); ?>"><?php echo esc_html($l[0]); ?><?php echo $arrow; ?></a></li>
+                            <?php foreach ($col['links'] as $l): ?>
+                                <li><a class="<?php echo $link_class; ?>" href="<?php echo esc_url($l['url']); ?>"><?php echo esc_html($l['label']); ?><?php echo $arrow; ?></a></li>
                             <?php endforeach; ?>
-                            <?php if ($title === 'Informazioni legali'): ?>
+                            <?php if (!empty($col['is_legal'])): ?>
                                 <li><button type="button" class="js-cookie-prefs text-sm text-white/60 transition-colors hover:text-white">Preferenze cookie</button></li>
                             <?php endif; ?>
                         </ul>

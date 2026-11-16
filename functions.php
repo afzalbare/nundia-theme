@@ -68,9 +68,31 @@ function nundia_ensure_richiesta_commerciale_page() {
 }
 add_action('init', 'nundia_ensure_richiesta_commerciale_page');
 
+/** Ensure dedicated 'Diventa Partner' page exists in WordPress */
+function nundia_ensure_diventa_partner_page() {
+    $slug = 'diventa-partner';
+    $page = get_page_by_path($slug);
+    if (!$page) {
+        wp_insert_post(array(
+            'post_title'     => 'Diventa Partner',
+            'post_name'      => $slug,
+            'post_status'    => 'publish',
+            'post_type'      => 'page',
+            'page_template'  => 'page-templates/page-diventa-partner.php',
+        ));
+    }
+}
+add_action('init', 'nundia_ensure_diventa_partner_page');
+
 add_action('template_redirect', function () {
     if (is_page('richieste-commerciali')) {
         wp_redirect(home_url('/richiesta-commerciale/'), 301);
+        exit;
+    }
+    $posts_page_id = (int) get_option('page_for_posts');
+    if (is_home() || ($posts_page_id && is_page($posts_page_id)) || is_page('journal') || is_page('notizie')) {
+        // Redirect obsolete Notizie/Journal to Diventa Partner per client instructions
+        wp_redirect(home_url('/diventa-partner/'), 301);
         exit;
     }
 });
@@ -209,8 +231,11 @@ function nundia_cart_count() {
     return (function_exists('WC') && WC()->cart) ? (int) WC()->cart->get_cart_contents_count() : 0;
 }
 
-/** Theme's custom cart & checkout templates */
+/** Theme's custom cart, checkout & template fallbacks */
 add_filter('template_include', function ($template) {
+    if (is_page('diventa-partner')) {
+        return get_template_directory() . '/page-templates/page-diventa-partner.php';
+    }
     if (!function_exists('is_cart')) return $template;
     if (is_cart()) return get_template_directory() . '/woocommerce-cart.php';
     if (is_checkout()) return get_template_directory() . '/woocommerce-checkout.php';
@@ -336,6 +361,72 @@ function nundia_ajax_b2b_handler() {
 }
 add_action('wp_ajax_nundia_ajax_b2b', 'nundia_ajax_b2b_handler');
 add_action('wp_ajax_nopriv_nundia_ajax_b2b', 'nundia_ajax_b2b_handler');
+
+function nundia_ajax_partner_handler() {
+    check_ajax_referer('nundia_nonce', 'nonce');
+
+    $company   = nundia_post_field('company');
+    $vat       = nundia_post_field('vat');
+    $name      = nundia_post_field('name');
+    $email     = sanitize_email(nundia_post_field('email'));
+    $phone     = nundia_post_field('phone');
+    $territory = nundia_post_field('territory');
+    $type      = nundia_post_field('type');
+    $message   = nundia_post_field('message', true);
+
+    if (!$company || !$name || !is_email($email) || !$vat || !$phone || !$territory) {
+        wp_send_json_error(array('message' => 'Compila tutti i campi obbligatori.'));
+    }
+
+    $attachments = array();
+    if (!empty($_FILES['proposal_pdf']['name'])) {
+        $file = $_FILES['proposal_pdf'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'pdf') {
+            wp_send_json_error(array('message' => 'Il file allegato deve essere esclusivamente in formato PDF.'));
+        }
+        if ($file['size'] > 10 * 1024 * 1024) {
+            wp_send_json_error(array('message' => 'Il documento PDF non può superare 10 MB.'));
+        }
+
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        $overrides = array('test_form' => false, 'mimes' => array('pdf' => 'application/pdf'));
+        $uploaded = wp_handle_upload($file, $overrides);
+        if (!empty($uploaded['file'])) {
+            $attachments[] = $uploaded['file'];
+        }
+    } else {
+        wp_send_json_error(array('message' => 'È necessario allegare la proposta o profilo aziendale in formato PDF.'));
+    }
+
+    $to = nd_opt('email_orders') ?: (get_option('admin_email') ?: 'info@nundia.it');
+    $subject = '[NUNDÌA Partner] Nuova proposta da ' . $company . ' (' . $territory . ')';
+    $body = "NUOVA CANDIDATURA PARTNERSHIP NUNDÌA\n"
+          . str_repeat('=', 45) . "\n\n"
+          . "Azienda / Ragione Sociale: {$company}\n"
+          . "Partita IVA / Tax ID: {$vat}\n"
+          . "Nome Referente: {$name}\n"
+          . "Email: {$email}\n"
+          . "Telefono: {$phone}\n"
+          . "Territorio / Paese: {$territory}\n"
+          . "Tipologia Partner: {$type}\n\n"
+          . "Lettera di presentazione:\n"
+          . "-----------------------------------------\n"
+          . "{$message}\n"
+          . "-----------------------------------------\n\n";
+
+    if (!empty($attachments)) {
+        $body .= "Documento allegato: " . basename($attachments[0]) . "\n";
+    }
+
+    $headers = array('Content-Type: text/plain; charset=UTF-8', 'Reply-To: ' . $name . ' <' . $email . '>');
+    @wp_mail($to, $subject, $body, $headers, $attachments);
+
+    $success_msg = nd('dp_form_success_msg') ?: 'Grazie per la proposta! Abbiamo ricevuto la tua candidatura e il documento PDF. Il nostro team commerciale la esaminerà con la massima attenzione e ti risponderà a breve.';
+    wp_send_json_success(array('message' => $success_msg));
+}
+add_action('wp_ajax_nundia_ajax_partner', 'nundia_ajax_partner_handler');
+add_action('wp_ajax_nopriv_nundia_ajax_partner', 'nundia_ajax_partner_handler');
 
 function nundia_ajax_contact_handler() {
     check_ajax_referer('nundia_nonce', 'nonce');

@@ -167,6 +167,9 @@ function nundia_product_card($product, $extra_attrs = '')
                     <span class="nd-product-price-label">Prezzo</span>
                     <span class="nd-product-price-value"><?php echo esc_html(nundia_price($product->get_price())); ?></span>
                 </div>
+                <p class="nd-product-tax-note text-[9.5px] leading-tight text-muted-foreground/85 -mt-2 mb-2.5 text-right font-normal">
+                    (IVA inclusa) - escluse spese di trasporto
+                </p>
                 <button type="button" class="js-add-to-cart nd-product-btn" data-product-id="<?php echo esc_attr($id); ?>" data-label="Aggiungi al carrello" data-done="Aggiunto!" data-check="1" <?php disabled(!$in_stock); ?>>
                     <?php if ($in_stock): ?>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="opacity-95" aria-hidden="true">
@@ -247,7 +250,15 @@ function nundia_nav_items()
         $menu_items = wp_get_nav_menu_items($locations['primary']);
         if ($menu_items) {
             foreach ($menu_items as $mi) {
-                if ((int) $mi->menu_item_parent === 0) $items[] = array('title' => $mi->title, 'url' => $mi->url);
+                if ((int) $mi->menu_item_parent === 0) {
+                    $title = $mi->title;
+                    $url = $mi->url;
+                    // Remove Notizie per client instruction
+                    if (stripos($title, 'Notizie') !== false || stripos($url, '/journal') !== false) {
+                        continue;
+                    }
+                    $items[] = array('title' => $title, 'url' => $url);
+                }
             }
         }
     }
@@ -256,14 +267,38 @@ function nundia_nav_items()
             array(
                 array('Home', '/'),
                 array('Chi siamo', '/chi-siamo/'),
-                array('Notizie', '/journal/'),
                 array('Ricette', '/ricette/'),
                 array('B2B', '/b2b/'),
                 array('Shop', '/shop/'),
                 array('FAQ', '/faq/'),
+                array('Diventa Partner', '/diventa-partner/'),
                 array('Contatti', '/contatti/'),
             ) as $i
         ) $items[] = array('title' => $i[0], 'url' => home_url($i[1]));
+    } else {
+        // Ensure Diventa Partner is inserted between FAQ and Contatti
+        $has_partner = false;
+        foreach ($items as $it) {
+            if (stripos($it['title'], 'Diventa Partner') !== false || stripos($it['url'], 'diventa-partner') !== false) {
+                $has_partner = true;
+                break;
+            }
+        }
+        if (!$has_partner) {
+            $new_items = array();
+            $inserted = false;
+            foreach ($items as $it) {
+                if (!$inserted && (stripos($it['title'], 'Contatti') !== false || stripos($it['url'], '/contatti') !== false)) {
+                    $new_items[] = array('title' => 'Diventa Partner', 'url' => home_url('/diventa-partner/'));
+                    $inserted = true;
+                }
+                $new_items[] = $it;
+            }
+            if (!$inserted) {
+                $new_items[] = array('title' => 'Diventa Partner', 'url' => home_url('/diventa-partner/'));
+            }
+            $items = $new_items;
+        }
     }
     return $items;
 }
@@ -280,5 +315,6 @@ function nundia_is_current($url)
     if ($path === 'shop' && (is_singular('product') || is_tax('product_cat'))) return true;
     if ($path === 'journal' && (is_singular('post') || is_category())) return true;
     if ($path === 'ricette' && is_singular('recipe')) return true;
+    if ($path === 'diventa-partner' && is_page('diventa-partner')) return true;
     return false;
 }
