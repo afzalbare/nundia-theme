@@ -10,10 +10,7 @@ $title = nd('home_about_title');
 $sub = nd('home_about_sub');
 $body = nd('home_about_body');
 $cta = nd('home_about_cta');
-$cta_url = nd('home_about_cta_url');
-if (!$cta_url) {
-    $cta_url = home_url('/chi-siamo/');
-}
+$cta_url = nd_url(nd('home_about_cta_url'), '/chi-siamo/');
 
 if (!$image && !$eyebrow && !$title && !$sub && !$body && !$cta) {
     return;

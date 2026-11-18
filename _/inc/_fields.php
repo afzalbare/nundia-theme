@@ -43,10 +43,15 @@ function nundia_option_fields() {
         'payment_methods'   => array('Pagamenti accettati', 'text', 'Visa · Mastercard · American Express · Maestro · Postepay · PayPal'),
         'footer_legal'      => array('Footer – riga aziendale', 'text', 'NUNDÌA – Gruppo Typhoeus – Via Vito D’Anna, 18. 95024 – Acireale (CT) – Italia – P.IVA 05757810873'),
         'footer_note'       => array('Footer – nota (lascia vuoto per nasconderla)', 'text', 'Immagini e contenuti provvisori in attesa dei materiali ufficiali.'),
-        'tab_shop'          => array('Note Shop & Checkout', 'tab', ''),
+        'tab_shop'          => array('Note Shop & Spedizioni', 'tab', ''),
+        'shipping_cost_it'        => array('Costo Spedizione Italia (€)', 'text', '6.90'),
+        'shipping_cost_fr'        => array('Costo Spedizione Francia (€)', 'text', '12.00'),
+        'shipping_cost_de'        => array('Costo Spedizione Germania (€)', 'text', '12.00'),
+        'shipping_cost_eu'        => array('Costo Spedizione Altri Paesi UE (€)', 'text', '15.00'),
+        'shipping_free_threshold' => array('Soglia Spedizione Gratuita (€) – 0 per disattivare', 'text', '50.00'),
         'payment_note'      => array('Nota metodo di pagamento (checkout)', 'textarea', 'Dopo la conferma riceverai via email le istruzioni per il bonifico bancario. Il pagamento con carta sarà attivo non appena collegato il provider.'),
-        'shipping_note'     => array('Nota spedizioni (checkout)', 'textarea', 'Spediamo in tutti i paesi dell’Unione Europea. Il costo di spedizione dipende dal paese di destinazione: lo confermiamo prima di dare corso all’ordine.'),
-        'cart_note'         => array('Nota carrello', 'textarea', 'Le spese di spedizione e le eventuali imposte sono confermate prima della spedizione.'),
+        'shipping_note'     => array('Nota spedizioni (checkout)', 'textarea', 'Spediamo in tutti i paesi dell’Unione Europea con corriere espresso tracciato.'),
+        'cart_note'         => array('Nota carrello', 'textarea', 'Imballaggio isotermico garantito e spedizione tracciata con corriere espresso.'),
         'tab_settings'      => array('Impostazioni Generali', 'tab', ''),
         'site_font'         => array('Carattere del sito', 'select', 'arial'),
         'show_draft_badges' => array('Mostra le etichette “Contenuto provvisorio — da confermare”', 'true_false', 1),
@@ -102,6 +107,7 @@ function nundia_page_fields() {
                 'home_about_sub'     => array('Chi siamo – sottotitolo', 'text', 'Sicilia, autenticamente.'),
                 'home_about_body'    => array('Chi siamo – testo', 'textarea', 'Selezioniamo specialità della tradizione siciliana e le presentiamo con un’attenzione contemporanea al dettaglio: ingredienti riconoscibili, ricette rispettate, confezioni pensate per essere donate.'),
                 'home_about_cta'     => array('Chi siamo – pulsante', 'text', 'La nostra storia'),
+                'home_about_cta_url' => array('Chi siamo – link del pulsante', 'text', '/chi-siamo/'),
                 'tab_best'           => array('I più amati', 'tab', ''),
                 'home_best_eyebrow'  => array('I più amati – etichetta', 'text', 'Shop'),
                 'home_best_title'    => array('I più amati – titolo (mostra i prodotti “In evidenza” di WooCommerce)', 'text', 'I più amati'),
@@ -113,10 +119,10 @@ function nundia_page_fields() {
                 'home_b2b_body'      => array('B2B – testo', 'textarea', 'GDO, hotel, ristoranti e distributori internazionali: costruiamo assortimenti su misura, formati dedicati e forniture continuative.'),
                 'home_b2b_tags'      => array('B2B – etichette (una per riga)', 'textarea', "GDO\nHO.RE.CA.\nImportatori"),
                 'home_b2b_cta'       => array('B2B – pulsante', 'text', 'Richiesta commerciale'),
+                'home_b2b_cta_url'   => array('B2B – link del pulsante', 'text', '/richiesta-commerciale/'),
                 'tab_editorial'      => array('Notizie e ricette', 'tab', ''),
                 'home_journal_title' => array('Notizie – titolo', 'text', 'Ultime notizie'),
                 'home_recipes_title' => array('Ricette – titolo', 'text', 'Ricette da rifare a casa'),
-                'home_recipes_note'  => array('Ricette – nota', 'text', 'Dolci e piatti della tradizione siciliana, spiegati passo dopo passo.'),
                 'home_see_all'       => array('Etichetta “Vedi tutto”', 'text', 'Vedi tutto'),
                 'tab_nl'             => array('Newsletter', 'tab', ''),
                 'home_nl_eyebrow'    => array('Newsletter – etichetta', 'text', 'Contatti'),
@@ -146,6 +152,7 @@ function nundia_page_fields() {
                 'about_cta_title'        => array('Invito – titolo', 'text', 'Scopri la collezione'),
                 'about_cta_body'         => array('Invito – testo', 'text', 'Dolci da gustare, da regalare, da portare in tavola.'),
                 'about_cta_button'       => array('Invito – pulsante', 'text', 'Scopri i prodotti'),
+                'about_cta_url'          => array('Invito – link del pulsante', 'text', '/shop/'),
             ),
         ),
         'b2b' => array(
@@ -154,7 +161,6 @@ function nundia_page_fields() {
                 'b2b_band_image'       => array('Fascia immagine', 'image', '4fe13ad40_generated_e39a5532.png'),
                 'b2b_cards'            => array('Canali (uno per riga: Sigla | Titolo | Testo)', 'textarea', "GDO | Grande distribuzione | Assortimenti dedicati, formati per scaffale e piani di fornitura continuativi, con materiali di supporto al punto vendita.\nHO.RE.CA. | Hotel, ristoranti, catering | Porzionature professionali, prodotti pronti al servizio e referenze selezionate per la carta dessert.\nImport | Importatori e distributori | Documentazione prodotto, etichettatura per mercato e supporto alla costruzione del catalogo."),
                 'b2b_cards_draft'      => array('Canali – mostra etichetta “provvisorio”', 'true_false', 1),
-                'b2b_collections'      => array('Collezioni – titolo', 'text', 'Le collezioni NUNDÌA'),
                 'b2b_banner_eyebrow'   => array('Banda nera – etichetta', 'text', 'B2B'),
                 'b2b_banner_heading'   => array('Banda nera – testo', 'textarea', 'Per GDO, HO.RE.CA. e distribuzione internazionale utilizza il modulo dedicato.'),
                 'b2b_banner_cta_label' => array('Banda nera – pulsante testo', 'text', 'Richiesta commerciale'),
@@ -177,9 +183,6 @@ function nundia_page_fields() {
             'fields' => array(
                 'contact_social_label' => array('Social – etichetta', 'text', 'Contatti'),
                 'contact_social_text'  => array('Social – testo (se vuoto mostra le icone social)', 'text', 'Da definire'),
-                'contact_b2b_eyebrow'  => array('Box B2B – etichetta', 'text', 'B2B'),
-                'contact_b2b_body'     => array('Box B2B – testo', 'textarea', 'Per GDO, HO.RE.CA. e distribuzione internazionale utilizza il modulo dedicato.'),
-                'contact_b2b_link'     => array('Box B2B – link', 'text', 'Richiesta commerciale'),
                 'contact_privacy_note' => array('Nota privacy sotto il modulo', 'textarea', 'Inviando il modulo acconsenti al trattamento dei dati per rispondere alla tua richiesta. Vedi la Privacy policy.'),
             ),
         ),
@@ -320,6 +323,14 @@ function nd($key, $post_id = null) {
     return nundia_is_empty($v) ? '' : $v;
 }
 
+/** Link typed by the editor: "/shop/" becomes a full site URL, full URLs are kept as they are. */
+function nd_url($url, $fallback = '') {
+    $url = trim((string) $url);
+    if ($url === '') $url = $fallback;
+    if ($url === '' || preg_match('~^(https?:|mailto:|tel:|#)~i', $url)) return $url;
+    return home_url('/' . ltrim($url, '/'));
+}
+
 /** Split a "one per line" textarea into trimmed lines. */
 function nd_lines($text) {
     if (empty($text)) return array();
@@ -386,7 +397,7 @@ function nundia_acf_field($group_key, $name, $def) {
     if ($type === 'image') {
         $f['return_format'] = 'array';
         $f['preview_size'] = 'medium';
-        $f['instructions'] = 'Lascia vuoto per usare l’immagine predefinita.';
+        $f['instructions'] = 'Lascia vuoto per non mostrare l’immagine.';
     } elseif ($type === 'select') {
         $f['choices'] = nundia_font_choices();
         $f['default_value'] = $default;
@@ -449,7 +460,7 @@ function nundia_register_acf_fields() {
         )),
         'position' => 'acf_after_title',
         'menu_order' => 0,
-        'description' => 'Lascia vuoto un campo per usare il testo predefinito.',
+        'description' => 'Titolo vuoto = titolo della pagina. Gli altri campi, se vuoti, non vengono mostrati.',
     ));
 
     // Home: slides
@@ -507,8 +518,23 @@ function nundia_register_acf_fields() {
         'key' => 'group_nundia_product_fields',
         'title' => 'Dettagli Prodotto NUNDÌA',
         'fields' => array(
-            array('key' => 'field_product_unit_label', 'label' => 'Formato / Peso (es: 200 g)', 'name' => 'unit_label', 'type' => 'text'),
-            array('key' => 'field_product_ingredients', 'label' => 'Ingredienti', 'name' => 'ingredients', 'type' => 'textarea', 'instructions' => 'Vuoto = “Contenuto provvisorio — da confermare”.'),
+            array('key' => 'field_product_unit_label', 'label' => 'Peso Netto (es. 360 g, 500 gr, 1 kg)', 'name' => 'unit_label', 'type' => 'text', 'instructions' => 'Indicare solo il peso netto e l’unità di misura (es. “360 g”, “500 gr”, “1 kg”), senza “barattolo” o altro. Visualizzato nella scheda prodotto e nel carrello.'),
+            array(
+                'key' => 'field_product_formats',
+                'label' => 'Formati disponibili (Varianti di peso e prezzo)',
+                'name' => 'product_formats',
+                'type' => 'repeater',
+                'layout' => 'table',
+                'button_label' => 'Aggiungi formato',
+                'instructions' => 'Se il prodotto è disponibile in più formati (es. 240 gr, 360 gr), inseriscili qui. Lascia vuoto se il prodotto ha un unico formato.',
+                'sub_fields' => array(
+                    array('key' => 'field_fmt_label', 'label' => 'Etichetta Formato (es. 240 gr)', 'name' => 'format_label', 'type' => 'text'),
+                    array('key' => 'field_fmt_price', 'label' => 'Prezzo (€)', 'name' => 'format_price', 'type' => 'text'),
+                    array('key' => 'field_fmt_stock', 'label' => 'Disponibile', 'name' => 'format_in_stock', 'type' => 'true_false', 'default_value' => 1, 'ui' => 1),
+                    array('key' => 'field_fmt_net_weight', 'label' => 'Peso netto (es. 240 g, 360 gr)', 'name' => 'format_net_weight', 'type' => 'text'),
+                ),
+            ),
+            array('key' => 'field_product_ingredients', 'label' => 'Ingredienti', 'name' => 'ingredients', 'type' => 'textarea'),
             array('key' => 'field_product_allergens', 'label' => 'Allergeni', 'name' => 'allergens', 'type' => 'textarea'),
             array('key' => 'field_product_nutrition', 'label' => 'Valori nutrizionali', 'name' => 'nutrition', 'type' => 'textarea'),
             array('key' => 'field_product_packaging', 'label' => 'Confezionamento', 'name' => 'packaging', 'type' => 'textarea'),

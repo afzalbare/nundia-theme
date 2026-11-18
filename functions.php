@@ -256,14 +256,52 @@ function nundia_ajax_add_to_cart() {
     check_ajax_referer('nundia_nonce', 'nonce');
     $product_id = isset($_POST['product_id']) ? absint($_POST['product_id']) : 0;
     $quantity = isset($_POST['quantity']) ? max(1, absint($_POST['quantity'])) : 1;
+    $format = isset($_POST['format']) ? sanitize_text_field(wp_unslash($_POST['format'])) : '';
+    $price = isset($_POST['price']) ? floatval($_POST['price']) : 0;
+
     if ($product_id && function_exists('WC')) {
-        $added = WC()->cart->add_to_cart($product_id, $quantity);
+        $cart_item_data = array();
+        if ($format !== '') {
+            $cart_item_data['format'] = $format;
+        }
+        if ($price > 0) {
+            $cart_item_data['custom_price'] = $price;
+        }
+        $added = WC()->cart->add_to_cart($product_id, $quantity, 0, array(), $cart_item_data);
         if ($added) wp_send_json_success(nundia_cart_payload(array('message' => 'Aggiunto al carrello')));
     }
     wp_send_json_error(array('message' => 'Impossibile aggiungere al carrello.'));
 }
 add_action('wp_ajax_nundia_add_to_cart', 'nundia_ajax_add_to_cart');
 add_action('wp_ajax_nopriv_nundia_add_to_cart', 'nundia_ajax_add_to_cart');
+
+// Apply custom format price to cart items
+add_action('woocommerce_before_calculate_totals', function ($cart) {
+    if (is_admin() && !defined('DOING_AJAX')) return;
+    foreach ($cart->get_cart() as $cart_item) {
+        if (!empty($cart_item['custom_price'])) {
+            $cart_item['data']->set_price(floatval($cart_item['custom_price']));
+        }
+    }
+}, 20, 1);
+
+// Display format meta in WooCommerce cart & order items
+add_filter('woocommerce_get_item_data', function ($item_data, $cart_item) {
+    if (!empty($cart_item['format'])) {
+        $item_data[] = array(
+            'key'     => 'Formato',
+            'value'   => $cart_item['format'],
+            'display' => '',
+        );
+    }
+    return $item_data;
+}, 10, 2);
+
+add_action('woocommerce_checkout_create_order_line_item', function ($item, $cart_item_key, $values, $order) {
+    if (!empty($values['format'])) {
+        $item->add_meta_data('Formato', $values['format'], true);
+    }
+}, 10, 4);
 
 function nundia_ajax_update_cart_item() {
     check_ajax_referer('nundia_nonce', 'nonce');
@@ -313,6 +351,22 @@ function nundia_handle_checkout() {
     foreach ($cart->get_cart() as $item) {
         $order->add_product($item['data'], $item['quantity']);
     }
+
+    // Add shipping cost if applicable
+    $subtotal = floatval($cart->get_subtotal());
+    $rates = nundia_shipping_rates();
+    $th = nundia_free_shipping_threshold();
+    $selected_country = isset($_POST['nd_shipping_country']) ? sanitize_text_field(wp_unslash($_POST['nd_shipping_country'])) : 'IT';
+    $rate_item = isset($rates[$selected_country]) ? $rates[$selected_country] : $rates['IT'];
+    $shipping_cost = ($th > 0 && $subtotal >= $th) ? 0.0 : $rate_item['cost'];
+
+    if ($shipping_cost > 0) {
+        $shipping_item = new WC_Order_Item_Shipping();
+        $shipping_item->set_method_title('Spedizione (' . $rate_item['label'] . ')');
+        $shipping_item->set_total($shipping_cost);
+        $order->add_item($shipping_item);
+    }
+
     $order->set_address($address, 'billing');
     $order->set_address($address, 'shipping');
     $order->set_payment_method('bacs');
@@ -491,6 +545,8 @@ add_filter('body_class', function ($c) {
 
 add_filter('document_title_separator', function () { return '|'; });
 add_filter('pre_get_document_title', function ($t) {
-    if (is_front_page()) return 'NUNDÌA – Sapori di Sicilia | Pasticceria e specialità siciliane';
-    return $t;
+    if (!is_front_page()) return $t;
+    // Brand + slogan come from Site Settings; the tail is the WordPress tagline (Impostazioni → Generali).
+    $brand = implode(' – ', array_filter(array(nd_opt('brand_name'), nd_opt('brand_slogan'))));
+    return $brand . ' | ' . (get_bloginfo('description') ?: 'Pasticceria e specialità siciliane');
 });

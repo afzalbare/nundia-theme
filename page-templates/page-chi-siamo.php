@@ -141,7 +141,7 @@ $cta_title = nd('about_cta_title');
 $cta_body = nd('about_cta_body');
 $cta_button = nd('about_cta_button');
 if ($cta_title || $cta_body || $cta_button): 
-    $shop_url = function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/shop/');
+    $shop_url = nd_url(nd('about_cta_url')) ?: (function_exists('wc_get_page_permalink') ? wc_get_page_permalink('shop') : home_url('/shop/'));
 ?>
 <section class="container-ed py-16 text-center lg:py-24">
     <div class="reveal">

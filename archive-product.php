@@ -44,7 +44,7 @@ $off = 'border-border text-foreground/70 hover:border-foreground';
             $slugs = wp_get_post_terms($p->get_id(), 'product_cat', array('fields' => 'slugs'));
             $attrs = sprintf('data-item data-cat="%s" data-price="%s" data-date="%d" data-text="%s"',
                 esc_attr(implode(' ', $slugs)), esc_attr($p->get_price()), count($products) - $i,
-                esc_attr(mb_strtolower($p->get_name() . ' ' . wp_strip_all_tags($p->get_short_description()))));
+                esc_attr(mb_strtolower($p->get_name() . ' ' . nundia_product_weight($p) . ' ' . wp_strip_all_tags($p->get_short_description()))));
             nundia_product_card($p, $attrs);
         endforeach; ?>
     </div>

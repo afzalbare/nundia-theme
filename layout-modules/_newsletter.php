@@ -24,7 +24,7 @@ $btn_label = $button ?: 'Iscriviti';
                 <h2 class="mt-4 font-serif text-[clamp(2rem,3.6vw,2.8rem)] font-normal leading-[1.08]"><?php echo esc_html($title); ?></h2>
             <?php endif; ?>
             <?php if ($body): ?>
-                <p class="mx-auto mt-4 max-w-3xl text-[14px] leading-relaxed text-muted-foreground whitespace-normal md:whitespace-nowrap"><?php echo esc_html($body); ?></p>
+                <p class="mx-auto mt-4 max-w-3xl text-[14px] leading-relaxed text-muted-foreground"><?php echo esc_html($body); ?></p>
             <?php endif; ?>
             <form class="js-ajax-form mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row" data-action="nundia_ajax_newsletter" novalidate>
                 <label class="sr-only" for="newsletter-email">Email</label>

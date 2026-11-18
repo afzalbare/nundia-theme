@@ -40,13 +40,10 @@ $has_both = !empty($news) && !empty($recipes);
                 $news_title = nd('home_journal_title');
             ?>
             <div class="reveal">
-                <?php if ($news_title || $see_all): ?>
+                <?php if ($news_title): ?>
                 <div class="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
                     <?php if ($news_title): ?>
                         <h2 class="text-[clamp(1.7rem,2.8vw,2.3rem)] leading-none text-foreground"><?php echo esc_html($news_title); ?></h2>
-                    <?php endif; ?>
-                    <?php if ($see_all): ?>
-                        <a class="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-primary" href="<?php echo esc_url(home_url('/journal/')); ?>"><?php echo esc_html($see_all); ?><?php echo $arrow; ?></a>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>

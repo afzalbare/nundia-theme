@@ -29,6 +29,11 @@ $cart = WC()->cart;
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <a class="text-[15px] leading-snug hover:text-primary" href="<?php echo esc_url($link); ?>"><?php echo esc_html($p->get_name()); ?></a>
+                                        <?php 
+                                        $item_format = !empty($item['format']) ? $item['format'] : nundia_product_weight($item['product_id']);
+                                        if ($item_format): ?>
+                                            <p class="mt-0.5 text-[11.5px] font-medium text-muted-foreground"><?php echo esc_html($item_format); ?></p>
+                                        <?php endif; ?>
                                         <p class="mt-1 text-[12.5px] text-muted-foreground"><?php echo esc_html(nundia_price($p->get_price())); ?></p>
                                     </div>
                                     <button type="button" class="js-cart-set p-1 text-muted-foreground transition-colors hover:text-primary" data-qty="0" aria-label="Rimuovi"><?php echo nundia_icon('x', 'h-4 w-4', 1.5); ?></button>
@@ -47,17 +52,62 @@ $cart = WC()->cart;
                 </ul>
                 <a class="mt-8 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground" href="<?php echo esc_url(wc_get_page_permalink('shop')); ?>">Continua gli acquisti</a>
             </div>
+            <?php 
+            $subtotal = floatval($cart->get_subtotal());
+            $shipping_rates = nundia_shipping_rates();
+            $free_threshold = nundia_free_shipping_threshold();
+            $default_country = 'IT';
+            $default_shipping = ($free_threshold > 0 && $subtotal >= $free_threshold) ? 0.0 : $shipping_rates[$default_country]['cost'];
+            $grand_total = $subtotal + $default_shipping;
+            ?>
             <aside class="lg:sticky lg:top-32 lg:self-start">
                 <div class="rounded-2xl bg-muted/40 p-6 sm:p-8">
-                    <h2 class="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Totale</h2>
-                    <div class="mt-5 flex items-baseline justify-between">
-                        <span class="text-[13px] text-muted-foreground">Subtotale</span>
-                        <div class="text-right">
-                            <span class="text-lg font-semibold tabular-nums text-foreground"><?php echo esc_html(nundia_price($cart->get_subtotal())); ?></span>
-                            <span class="mt-0.5 block text-[11px] font-normal text-muted-foreground/85">(IVA inclusa) - escluse spese di trasporto</span>
+                    <h2 class="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Riepilogo Ordine</h2>
+                    
+                    <!-- Subtotale prodotti -->
+                    <div class="mt-5 flex items-baseline justify-between pb-3.5 border-b border-border/80">
+                        <span class="text-[13px] text-muted-foreground">Subtotale prodotti</span>
+                        <span class="text-[15px] font-semibold tabular-nums text-foreground"><?php echo esc_html(nundia_price($subtotal)); ?></span>
+                    </div>
+
+                    <!-- Destinazione spedizione -->
+                    <div class="mt-4">
+                        <label for="js-shipping-country" class="block text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground mb-2">Destinazione spedizione</label>
+                        <select id="js-shipping-country" 
+                                class="w-full h-11 border border-input bg-white px-3 text-[13px] outline-none transition-colors focus:border-foreground"
+                                data-subtotal="<?php echo esc_attr($subtotal); ?>"
+                                data-threshold="<?php echo esc_attr($free_threshold); ?>">
+                            <?php foreach ($shipping_rates as $code => $rate): ?>
+                                <option value="<?php echo esc_attr($code); ?>" data-cost="<?php echo esc_attr($rate['cost']); ?>" <?php selected($code, $default_country); ?>>
+                                    <?php echo esc_html($rate['label']); ?> (<?php echo esc_html(nundia_price($rate['cost'])); ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Spese di trasporto esplicite -->
+                    <div class="mt-3.5 flex items-center justify-between text-[13px] pb-4 border-b border-border">
+                        <span class="text-muted-foreground">Spese di trasporto</span>
+                        <span class="js-shipping-cost font-semibold tabular-nums text-foreground">
+                            <?php echo $default_shipping == 0 ? '<span class="text-green-600">GRATUITA (0,00 €)</span>' : esc_html(nundia_price($default_shipping)); ?>
+                        </span>
+                    </div>
+
+                    <!-- Costo totale, IVA e trasporto inclusi (richiesto esplicitamente per legge) -->
+                    <div class="mt-5 pt-1">
+                        <div class="text-[11px] font-bold uppercase tracking-[0.12em] text-foreground leading-tight">
+                            COSTO TOTALE, IVA E TRASPORTO INCLUSI
+                        </div>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span class="text-[12px] text-muted-foreground">Totale finale</span>
+                            <span class="js-grand-total text-2xl font-bold tabular-nums text-primary">
+                                <?php echo esc_html(nundia_price($grand_total)); ?>
+                            </span>
                         </div>
                     </div>
+
                     <p class="mt-5 text-[12px] leading-relaxed text-muted-foreground"><?php echo esc_html(nd_opt('cart_note')); ?></p>
+                    
                     <a class="group mt-6 flex min-h-12 items-center justify-center gap-2 bg-primary px-6 text-[11px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-primary/90" href="<?php echo esc_url(wc_get_checkout_url()); ?>">
                         Vai al pagamento<?php echo nundia_icon('arrow-right', 'h-3.5 w-3.5 transition-transform group-hover:translate-x-1', 1.6); ?>
                     </a>

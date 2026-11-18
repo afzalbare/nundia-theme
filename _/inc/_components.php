@@ -128,6 +128,97 @@ function nundia_has_transparent_header()
     return true;
 }
 
+/**
+ * Normalize a raw weight/format string so it reports ONLY the weight and unit of measure
+ * (e.g. "360 g", "240 gr", "1,2 kg") without "barattolo", "confezione", "jar", etc.
+ */
+function nundia_format_net_weight($raw)
+{
+    $raw = trim((string) $raw);
+    if ($raw === '') return '';
+
+    if (preg_match('/(?<![a-zA-Z0-9])(\d+(?:[.,]\d+)?)\s*(kg|gr|g|mg|ml|cl|l|oz|lb)\b\.?/i', $raw, $m)) {
+        return $m[1] . ' ' . strtolower($m[2]);
+    }
+
+    if (preg_match('/^\d+(?:[.,]\d+)?$/', $raw)) {
+        return $raw . ' g';
+    }
+
+    return $raw;
+}
+
+/** Get all available formats/sizes for a product (ACF repeater only; no hardcoded defaults). */
+function nundia_get_product_formats($product)
+{
+    if (is_numeric($product)) $product = wc_get_product($product);
+    if (!$product) return array();
+    $id = $product->get_id();
+    $formats = array();
+
+    if (function_exists('get_field')) {
+        $acf_formats = get_field('product_formats', $id);
+        if (is_array($acf_formats) && !empty($acf_formats)) {
+            foreach ($acf_formats as $fmt) {
+                if (empty($fmt['format_label'])) continue;
+                $raw_net = !empty($fmt['format_net_weight']) ? trim($fmt['format_net_weight']) : trim($fmt['format_label']);
+                $formats[] = array(
+                    'label'      => trim($fmt['format_label']),
+                    'price'      => !empty($fmt['format_price']) ? floatval(str_replace(',', '.', $fmt['format_price'])) : floatval($product->get_price()),
+                    'in_stock'   => isset($fmt['format_in_stock']) ? (bool) $fmt['format_in_stock'] : true,
+                    'net_weight' => nundia_format_net_weight($raw_net),
+                );
+            }
+        }
+    }
+
+    return $formats;
+}
+
+/** Shipping rate definitions */
+function nundia_shipping_rates()
+{
+    return array(
+        'IT' => array(
+            'label' => 'Italia',
+            'cost'  => floatval(nd_opt('shipping_cost_it') ?: 6.90),
+        ),
+        'FR' => array(
+            'label' => 'Francia',
+            'cost'  => floatval(nd_opt('shipping_cost_fr') ?: 12.00),
+        ),
+        'DE' => array(
+            'label' => 'Germania',
+            'cost'  => floatval(nd_opt('shipping_cost_de') ?: 12.00),
+        ),
+        'EU' => array(
+            'label' => 'Altri Paesi UE',
+            'cost'  => floatval(nd_opt('shipping_cost_eu') ?: 15.00),
+        ),
+    );
+}
+
+/** Free shipping threshold */
+function nundia_free_shipping_threshold()
+{
+    $th = nd_opt('shipping_free_threshold');
+    return ($th !== '' && is_numeric($th)) ? floatval($th) : 50.0;
+}
+
+/** Get product net weight from ACF unit_label or WooCommerce Shipping weight only. */
+function nundia_product_weight($product)
+{
+    if (is_numeric($product)) $product = wc_get_product($product);
+    if (!$product) return '';
+    $id = $product->get_id();
+
+    $w = trim((string) get_post_meta($id, 'unit_label', true));
+    if ($w === '' && method_exists($product, 'has_weight') && $product->has_weight()) {
+        $w = $product->get_weight() . ' ' . get_option('woocommerce_weight_unit', 'g');
+    }
+    return nundia_format_net_weight($w);
+}
+
 /** Product card (shop grid, home carousel, related). */
 function nundia_product_card($product, $extra_attrs = '')
 {

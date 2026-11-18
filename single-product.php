@@ -7,8 +7,13 @@ while (have_posts()): the_post();
     $product = wc_get_product(get_the_ID());
     $id = $product->get_id();
     $in_stock = $product->is_in_stock() && $product->is_purchasable();
-    $unit = get_post_meta($id, 'unit_label', true);
+    $unit = nundia_product_weight($product);
+    $formats = nundia_get_product_formats($product);
+    $active_fmt = !empty($formats) ? $formats[0] : null;
+    $initial_price = $active_fmt ? $active_fmt['price'] : floatval($product->get_price());
+    $initial_weight = ($active_fmt && !empty($active_fmt['net_weight'])) ? nundia_format_net_weight($active_fmt['net_weight']) : $unit;
     $details = array(
+        'Peso netto' => $initial_weight,
         'Ingredienti' => get_post_meta($id, 'ingredients', true),
         'Allergeni' => get_post_meta($id, 'allergens', true),
         'Valori nutrizionali' => get_post_meta($id, 'nutrition', true),
@@ -44,51 +49,205 @@ while (have_posts()): the_post();
                 <?php endif; ?>
             </div>
             <div class="lg:pt-6">
-                <?php if ($unit): ?><p class="eyebrow"><?php echo esc_html($unit); ?></p><?php endif; ?>
+                <?php if ($initial_weight): ?><p class="eyebrow js-eyebrow-weight"><?php echo esc_html($initial_weight); ?></p><?php endif; ?>
                 <h1 class="mt-3 text-[clamp(1.9rem,3.6vw,2.9rem)] leading-[1.05]"><?php the_title(); ?></h1>
                 <div class="mt-4 flex flex-wrap items-baseline gap-2.5">
-                    <span class="js-single-price text-2xl font-bold tabular-nums text-primary" data-unit-price="<?php echo esc_attr($product->get_price()); ?>"><?php echo esc_html(nundia_price($product->get_price())); ?></span>
+                    <span class="js-single-price text-2xl font-bold tabular-nums text-primary" data-unit-price="<?php echo esc_attr($initial_price); ?>"><?php echo esc_html(nundia_price($initial_price)); ?></span>
                     <span class="text-[12px] font-medium text-muted-foreground">(IVA inclusa) - escluse spese di trasporto</span>
                 </div>
                 <?php if ($product->get_short_description()): ?>
                     <p class="mt-5 max-w-lg text-[15px] leading-relaxed text-muted-foreground"><?php echo esc_html(wp_strip_all_tags($product->get_short_description())); ?></p>
                 <?php endif; ?>
                 <div class="mt-7 flex items-center gap-2 text-[11px] uppercase tracking-[0.16em]">
-                    <span class="h-1.5 w-1.5 rounded-full <?php echo $in_stock ? 'bg-green-600' : 'bg-primary'; ?>"></span>
-                    <?php echo $in_stock ? 'Disponibile' : 'Non disponibile'; ?>
+                    <span class="js-stock-dot h-1.5 w-1.5 rounded-full <?php echo $in_stock ? 'bg-green-600' : 'bg-primary'; ?>"></span>
+                    <span class="js-stock-label"><?php echo $in_stock ? 'Disponibile' : 'Non disponibile'; ?></span>
                 </div>
+
+                <!-- Product Formats Selector (e.g. 240 gr, 360 gr) -->
+                <?php if (!empty($formats) && count($formats) > 1): ?>
+                    <div class="mt-6">
+                        <span class="block text-[10.5px] uppercase tracking-[0.2em] font-semibold text-muted-foreground mb-2.5">Formato disponibile</span>
+                        <div class="js-format-selector flex flex-wrap gap-2.5">
+                            <?php foreach ($formats as $idx => $fmt): ?>
+                                <button type="button" 
+                                    class="js-format-btn min-w-[95px] px-4 py-2.5 text-center text-[13px] font-semibold border transition-all duration-200 <?php echo $idx === 0 ? 'border-primary bg-primary/5 text-primary ring-1 ring-primary' : 'border-border bg-white text-foreground hover:border-foreground'; ?> <?php echo !$fmt['in_stock'] ? 'opacity-50 cursor-not-allowed line-through' : ''; ?>"
+                                    data-format="<?php echo esc_attr($fmt['label']); ?>"
+                                    data-price="<?php echo esc_attr($fmt['price']); ?>"
+                                    data-net-weight="<?php echo esc_attr($fmt['net_weight']); ?>"
+                                    data-in-stock="<?php echo $fmt['in_stock'] ? '1' : '0'; ?>"
+                                    <?php disabled(!$fmt['in_stock']); ?>>
+                                    <span><?php echo esc_html($fmt['label']); ?></span>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Quantity & Add to Cart -->
                 <div class="js-qty-wrap mt-7 flex flex-wrap items-center gap-3">
                     <div class="flex items-center rounded-sm bg-muted/60">
                         <button type="button" class="js-qty flex h-12 w-11 items-center justify-center transition-colors hover:bg-white" data-step="-1" aria-label="-"><?php echo nundia_icon('minus', 'h-3.5 w-3.5', 2); ?></button>
                         <span class="js-qty-value w-10 text-center text-sm font-medium tabular-nums">1</span>
                         <button type="button" class="js-qty flex h-12 w-11 items-center justify-center transition-colors hover:bg-white" data-step="1" aria-label="+"><?php echo nundia_icon('plus', 'h-3.5 w-3.5', 2); ?></button>
                     </div>
-                    <button type="button" class="js-add-to-cart inline-flex h-12 flex-1 items-center justify-center gap-2 bg-primary px-8 text-[11px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground sm:flex-none" data-product-id="<?php echo esc_attr($id); ?>" data-label="Aggiungi al carrello" data-done="Aggiunto al carrello" data-check="1" <?php disabled(!$in_stock); ?>>
+                    <button type="button" class="js-add-to-cart inline-flex h-12 flex-1 items-center justify-center gap-2 bg-primary px-8 text-[11px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground sm:flex-none" 
+                        data-product-id="<?php echo esc_attr($id); ?>" 
+                        data-format="<?php echo esc_attr($active_fmt['label'] ?? ''); ?>"
+                        data-price="<?php echo esc_attr($initial_price); ?>"
+                        data-label="Aggiungi al carrello" 
+                        data-done="Aggiunto al carrello" 
+                        data-check="1" <?php disabled(!$in_stock); ?>>
                         Aggiungi al carrello
                     </button>
                 </div>
-                <?php $desc = trim(wp_strip_all_tags(get_the_content())); if ($desc): ?>
-                    <div class="mt-9 border-t border-border pt-6">
-                        <p class="whitespace-pre-line text-[14.5px] leading-[1.85] text-foreground/80"><?php echo esc_html($desc); ?></p>
-                    </div>
-                <?php endif; ?>
+
+                <!-- Product Information Tabs ("Scheda del prodotto") -->
                 <?php 
-                $active_details = array_filter($details, function($v) {
-                    return trim((string)$v) !== '';
-                });
-                if (!empty($active_details)): ?>
-                    <dl class="mt-8 divide-y divide-border border-t border-border">
-                        <?php foreach ($active_details as $label => $value): ?>
-                            <div class="grid grid-cols-[130px_1fr] gap-4 py-4">
-                                <dt class="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground"><?php echo esc_html($label); ?></dt>
-                                <dd class="text-[13.5px] leading-relaxed text-foreground/80">
-                                    <span class="whitespace-pre-line"><?php echo esc_html($value); ?></span>
-                                </dd>
+                $desc = trim(wp_strip_all_tags(get_the_content()));
+                $short_desc = trim(wp_strip_all_tags($product->get_short_description()));
+                $ingredients = !empty($details['Ingredienti']) ? trim($details['Ingredienti']) : '';
+                $allergens = !empty($details['Allergeni']) ? trim($details['Allergeni']) : '';
+                $nutrition = !empty($details['Valori nutrizionali']) ? trim($details['Valori nutrizionali']) : '';
+                $packaging = !empty($details['Confezionamento']) ? trim($details['Confezionamento']) : '';
+
+                // WooCommerce native details & attributes
+                $sku = trim((string) $product->get_sku());
+                $dimensions = $product->has_dimensions() ? trim((string) wc_format_dimensions($product->get_dimensions(false))) : '';
+                $wc_attributes = array();
+                if ($product && method_exists($product, 'get_attributes')) {
+                    foreach ($product->get_attributes() as $attr) {
+                        if (is_object($attr) && method_exists($attr, 'get_visible') && !$attr->get_visible()) continue;
+                        $attr_name = is_object($attr) ? $attr->get_name() : '';
+                        $label = function_exists('wc_attribute_label') ? wc_attribute_label($attr_name, $product) : $attr_name;
+                        $values = array();
+                        if (is_object($attr) && method_exists($attr, 'is_taxonomy') && $attr->is_taxonomy()) {
+                            $terms = wc_get_product_terms($product->get_id(), $attr->get_name(), array('fields' => 'names'));
+                            $values = (!is_wp_error($terms) && !empty($terms)) ? $terms : array();
+                        } elseif (is_object($attr) && method_exists($attr, 'get_options')) {
+                            $values = $attr->get_options();
+                        } elseif (is_string($attr)) {
+                            $values = array($attr);
+                        }
+                        if (!empty($values)) {
+                            $wc_attributes[$label] = implode(', ', $values);
+                        }
+                    }
+                }
+
+                $has_desc = ($desc !== '' || $short_desc !== '');
+                $has_ingredients = ($ingredients !== '' || $allergens !== '');
+                $has_info = ($initial_weight !== '' || $packaging !== '' || $nutrition !== '' || !empty($wc_attributes) || $sku !== '' || $dimensions !== '');
+                $first_tab = $has_desc ? 'descrizione' : ($has_ingredients ? 'ingredienti' : ($has_info ? 'informazioni' : ''));
+                ?>
+                <?php if ($first_tab !== ''): ?>
+                <div class="mt-11 border-t border-border pt-7">
+                    <div class="border-b border-border">
+                        <nav class="js-tabs-nav -mb-px flex space-x-7 overflow-x-auto no-scrollbar" aria-label="Scheda prodotto">
+                            <?php if ($has_desc): ?>
+                                <button type="button" class="js-tab-btn whitespace-nowrap border-b-2 py-3.5 text-[11.5px] uppercase tracking-[0.18em] font-semibold transition-colors <?php echo $first_tab === 'descrizione' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'; ?>" data-tab="descrizione">
+                                    Descrizione
+                                </button>
+                            <?php endif; ?>
+                            <?php if ($has_ingredients): ?>
+                                <button type="button" class="js-tab-btn whitespace-nowrap border-b-2 py-3.5 text-[11.5px] uppercase tracking-[0.18em] font-semibold transition-colors <?php echo $first_tab === 'ingredienti' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'; ?>" data-tab="ingredienti">
+                                    Ingredienti
+                                </button>
+                            <?php endif; ?>
+                            <?php if ($has_info): ?>
+                                <button type="button" class="js-tab-btn whitespace-nowrap border-b-2 py-3.5 text-[11.5px] uppercase tracking-[0.18em] font-semibold transition-colors <?php echo $first_tab === 'informazioni' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'; ?>" data-tab="informazioni">
+                                    Informazioni aggiuntive
+                                </button>
+                            <?php endif; ?>
+                        </nav>
+                    </div>
+
+                    <div class="js-tabs-content pt-6">
+                        <!-- Tab: Descrizione -->
+                        <?php if ($has_desc): ?>
+                            <div class="js-tab-pane <?php echo $first_tab === 'descrizione' ? '' : 'hidden'; ?>" data-pane="descrizione">
+                                <?php if ($desc): ?>
+                                    <div class="text-[14.5px] leading-[1.85] text-foreground/80">
+                                        <p class="whitespace-pre-line"><?php echo esc_html($desc); ?></p>
+                                    </div>
+                                <?php else: ?>
+                                    <p class="text-[14px] leading-relaxed text-muted-foreground"><?php echo esc_html($short_desc); ?></p>
+                                <?php endif; ?>
                             </div>
-                        <?php endforeach; ?>
-                    </dl>
+                        <?php endif; ?>
+
+                        <!-- Tab: Ingredienti -->
+                        <?php if ($has_ingredients): ?>
+                            <div class="js-tab-pane <?php echo $first_tab === 'ingredienti' ? '' : 'hidden'; ?>" data-pane="ingredienti">
+                                <div class="space-y-4">
+                                    <?php if ($ingredients): ?>
+                                        <div>
+                                            <p class="text-[14px] leading-relaxed text-foreground/85 whitespace-pre-line"><?php echo esc_html($ingredients); ?></p>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if ($allergens): ?>
+                                        <div class="<?php echo $ingredients ? 'pt-3 border-t border-border/60' : ''; ?>">
+                                            <span class="block text-[10.5px] uppercase tracking-[0.16em] font-semibold text-muted-foreground mb-1">Allergeni</span>
+                                            <p class="text-[13.5px] leading-relaxed text-foreground/80 whitespace-pre-line"><?php echo esc_html($allergens); ?></p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Tab: Informazioni aggiuntive -->
+                        <?php if ($has_info): ?>
+                            <div class="js-tab-pane <?php echo $first_tab === 'informazioni' ? '' : 'hidden'; ?>" data-pane="informazioni">
+                                <dl class="divide-y divide-border">
+                                    <?php if ($initial_weight): ?>
+                                        <div class="grid grid-cols-[140px_1fr] gap-4 py-3.5 text-[13.5px]">
+                                            <dt class="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Peso netto</dt>
+                                            <dd class="text-foreground/90 font-medium js-tab-net-weight"><?php echo esc_html($initial_weight); ?></dd>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($packaging): ?>
+                                        <div class="grid grid-cols-[140px_1fr] gap-4 py-3.5 text-[13.5px]">
+                                            <dt class="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Confezionamento</dt>
+                                            <dd class="text-foreground/80 whitespace-pre-line"><?php echo esc_html($packaging); ?></dd>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($nutrition): ?>
+                                        <div class="grid grid-cols-[140px_1fr] gap-4 py-3.5 text-[13.5px]">
+                                            <dt class="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Valori nutrizionali</dt>
+                                            <dd class="text-foreground/80 whitespace-pre-line"><?php echo esc_html($nutrition); ?></dd>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($wc_attributes)): ?>
+                                        <?php foreach ($wc_attributes as $attr_label => $attr_val): ?>
+                                            <div class="grid grid-cols-[140px_1fr] gap-4 py-3.5 text-[13.5px]">
+                                                <dt class="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground font-semibold"><?php echo esc_html($attr_label); ?></dt>
+                                                <dd class="text-foreground/85"><?php echo esc_html($attr_val); ?></dd>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+
+                                    <?php if ($sku): ?>
+                                        <div class="grid grid-cols-[140px_1fr] gap-4 py-3.5 text-[13.5px]">
+                                            <dt class="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Codice SKU</dt>
+                                            <dd class="text-foreground/85 tabular-nums"><?php echo esc_html($sku); ?></dd>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($dimensions): ?>
+                                        <div class="grid grid-cols-[140px_1fr] gap-4 py-3.5 text-[13.5px]">
+                                            <dt class="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Dimensioni</dt>
+                                            <dd class="text-foreground/85"><?php echo esc_html($dimensions); ?></dd>
+                                        </div>
+                                    <?php endif; ?>
+                                </dl>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
                 <?php endif; ?>
-                <?php if ($has_draft && !empty($active_details) && nd_opt('show_draft_badges')) echo nd_draft_badge('mt-6'); ?>
+                <?php if ($has_draft && nd_opt('show_draft_badges')) echo nd_draft_badge('mt-6'); ?>
             </div>
         </div>
         <?php if ($related): ?>

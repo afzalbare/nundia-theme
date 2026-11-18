@@ -112,7 +112,7 @@ $socials = array('instagram' => 'Instagram', 'facebook' => 'Facebook', 'linkedin
                                 <li><a class="<?php echo $link_class; ?>" href="<?php echo esc_url($l['url']); ?>"><?php echo esc_html($l['label']); ?><?php echo $arrow; ?></a></li>
                             <?php endforeach; ?>
                             <?php if (!empty($col['is_legal'])): ?>
-                                <li><button type="button" class="js-cookie-prefs text-sm text-white/60 transition-colors hover:text-white">Preferenze cookie</button></li>
+                                <li><button type="button" class="js-cookie-prefs <?php echo $link_class; ?> text-left">Preferenze cookie<?php echo $arrow; ?></button></li>
                             <?php endif; ?>
                         </ul>
                     </div>

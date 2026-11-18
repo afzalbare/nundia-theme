@@ -22,8 +22,11 @@ $group          = nd_opt('brand_group');
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#FFFFFF">
-    <link rel="icon" type="image/png" href="<?php echo esc_url(nundia_img('nundia-emblem.png')); ?>">
-    <link rel="apple-touch-icon" href="<?php echo esc_url(nundia_img('nundia-emblem.png')); ?>">
+    <?php if (!has_site_icon()): // Site icon set in WordPress (Impostazioni → Generali) wins 
+    ?>
+        <link rel="icon" type="image/png" href="<?php echo esc_url(nundia_img('nundia-emblem.png')); ?>">
+        <link rel="apple-touch-icon" href="<?php echo esc_url(nundia_img('nundia-emblem.png')); ?>">
+    <?php endif; ?>
     <?php wp_head(); ?>
 </head>
 

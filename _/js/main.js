@@ -246,7 +246,12 @@
     if (!btn || btn.disabled) return;
     e.preventDefault();
     btn.classList.add('is-loading');
-    post('nundia_add_to_cart', { product_id: btn.dataset.productId, quantity: btn.dataset.quantity || 1 })
+    post('nundia_add_to_cart', {
+      product_id: btn.dataset.productId,
+      quantity: btn.dataset.quantity || 1,
+      format: btn.dataset.format || '',
+      price: btn.dataset.price || ''
+    })
       .then(function (res) {
         btn.classList.remove('is-loading');
         if (!res.success) return;
@@ -257,6 +262,137 @@
       })
       .catch(function () { btn.classList.remove('is-loading'); });
   });
+
+  /* Format selector on single product */
+  $$('.js-format-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      var selector = btn.closest('.js-format-selector');
+      if (selector) {
+        $$('.js-format-btn', selector).forEach(function (b) {
+          b.classList.remove('border-primary', 'bg-primary/5', 'text-primary', 'ring-1', 'ring-primary');
+          b.classList.add('border-border', 'bg-white', 'text-foreground');
+        });
+      }
+      btn.classList.remove('border-border', 'bg-white', 'text-foreground');
+      btn.classList.add('border-primary', 'bg-primary/5', 'text-primary', 'ring-1', 'ring-primary');
+
+      var price = parseFloat(btn.dataset.price) || 0;
+      var netWeight = btn.dataset.netWeight || btn.dataset.format || '';
+      var inStock = btn.dataset.inStock === '1';
+
+      var priceEl = $('.js-single-price');
+      var wrap = $('.js-qty-wrap');
+      var qtyVal = wrap ? ($('.js-qty-value', wrap) ? parseInt($('.js-qty-value', wrap).textContent, 10) : 1) : 1;
+      if (priceEl) {
+        priceEl.dataset.unitPrice = price;
+        var total = price * qtyVal;
+        try {
+          priceEl.textContent = new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total) + ' €';
+        } catch (err) {
+          priceEl.textContent = total.toFixed(2).replace('.', ',') + ' €';
+        }
+      }
+
+      var stockLabel = $('.js-stock-label');
+      var stockDot = $('.js-stock-dot');
+      if (stockLabel) stockLabel.textContent = inStock ? 'Disponibile' : 'Non disponibile';
+      if (stockDot) {
+        stockDot.classList.toggle('bg-green-600', inStock);
+        stockDot.classList.toggle('bg-primary', !inStock);
+      }
+
+      $$('.js-eyebrow-weight, .js-tab-net-weight').forEach(function (el) {
+        el.textContent = netWeight;
+      });
+
+      var addBtn = $('.js-add-to-cart');
+      if (addBtn) {
+        addBtn.dataset.format = btn.dataset.format;
+        addBtn.dataset.price = price;
+        addBtn.disabled = !inStock;
+      }
+    });
+  });
+
+  /* Product tabs on single product */
+  $$('.js-tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tabId = btn.dataset.tab;
+      var nav = btn.closest('.js-tabs-nav');
+      if (nav) {
+        $$('.js-tab-btn', nav).forEach(function (b) {
+          b.classList.remove('border-primary', 'text-primary');
+          b.classList.add('border-transparent', 'text-muted-foreground');
+        });
+      }
+      btn.classList.remove('border-transparent', 'text-muted-foreground');
+      btn.classList.add('border-primary', 'text-primary');
+
+      var contentWrap = nav ? nav.closest('div.border-t') : null;
+      var scope = contentWrap || document;
+      $$('.js-tab-pane', scope).forEach(function (pane) {
+        if (pane.dataset.pane === tabId) {
+          pane.classList.remove('hidden');
+        } else {
+          pane.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  /* Cart Shipping Destination & Live Totals */
+  var initCartShipping = function () {
+    var countrySelect = $('#js-shipping-country');
+    if (!countrySelect) return;
+
+    var updateCartTotals = function () {
+      var selected = countrySelect.options[countrySelect.selectedIndex];
+      var baseCost = parseFloat(selected.dataset.cost) || 0;
+      var subtotal = parseFloat(countrySelect.dataset.subtotal) || 0;
+      var freeThreshold = parseFloat(countrySelect.dataset.threshold) || 0;
+
+      var shippingCost = (freeThreshold > 0 && subtotal >= freeThreshold) ? 0 : baseCost;
+      var grandTotal = subtotal + shippingCost;
+
+      var costEl = $('.js-shipping-cost');
+      if (costEl) {
+        if (shippingCost === 0) {
+          costEl.textContent = 'GRATUITA (0,00 €)';
+          costEl.classList.add('text-green-600');
+        } else {
+          costEl.textContent = new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(shippingCost) + ' €';
+          costEl.classList.remove('text-green-600');
+        }
+      }
+
+      var grandEl = $('.js-grand-total');
+      if (grandEl) {
+        grandEl.textContent = new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(grandTotal) + ' €';
+      }
+
+      try {
+        localStorage.setItem('nundia_shipping_country', selected.value);
+        localStorage.setItem('nundia_shipping_cost', shippingCost);
+      } catch (e) {}
+    };
+
+    try {
+      var saved = localStorage.getItem('nundia_shipping_country');
+      if (saved) {
+        for (var i = 0; i < countrySelect.options.length; i++) {
+          if (countrySelect.options[i].value === saved) {
+            countrySelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+    } catch (e) {}
+
+    countrySelect.addEventListener('change', updateCartTotals);
+    updateCartTotals();
+  };
+  initCartShipping();
   $$('.js-cart-set').forEach(function (b) {
     b.addEventListener('click', function () {
       var line = b.closest('.js-cart-line');
@@ -380,7 +516,25 @@
       });
     });
     $('.js-cookie-close', banner).addEventListener('click', function () { store.set({ necessary: true, analytics: false, marketing: false, decided: true }); close(); });
-    $$('.js-cookie-prefs').forEach(function (b) { b.addEventListener('click', function () { banner.hidden = false; }); });
+    $$('.js-cookie-prefs').forEach(function (b) {
+      b.addEventListener('click', function () {
+        banner.hidden = false;
+        if (prefs) {
+          prefs.hidden = false;
+          var customBtn = $('[data-consent="custom"]', banner);
+          if (customBtn) customBtn.textContent = 'Salva preferenze';
+          try {
+            var saved = JSON.parse(store.get());
+            if (saved) {
+              var an = $('[name="analytics"]', prefs);
+              var mk = $('[name="marketing"]', prefs);
+              if (an) an.checked = !!saved.analytics;
+              if (mk) mk.checked = !!saved.marketing;
+            }
+          } catch (e) {}
+        }
+      });
+    });
   }
 
   /* 11. Language dropdown (Google Translate, Italian is the source language) */
