@@ -11,6 +11,36 @@ function nundia_img($filename)
     return get_template_directory_uri() . '/assets/images/' . ltrim($filename, '/');
 }
 
+/** Get .webp version of a URL if it exists on disk */
+function nundia_webp_candidate($url)
+{
+    if (empty($url) || !is_string($url)) return '';
+    if (substr(strtolower($url), -5) === '.webp') return $url;
+
+    $theme_uri = get_template_directory_uri();
+    $theme_dir = get_template_directory();
+    if (strpos($url, $theme_uri) === 0) {
+        $rel = substr($url, strlen($theme_uri));
+        $candidate = preg_replace('/\.(png|jpg|jpeg)$/i', '.webp', $theme_dir . $rel);
+        if (file_exists($candidate)) {
+            return preg_replace('/\.(png|jpg|jpeg)$/i', '.webp', $url);
+        }
+    }
+
+    if (function_exists('wp_upload_dir')) {
+        $upload = wp_upload_dir();
+        if (strpos($url, $upload['baseurl']) === 0) {
+            $rel = substr($url, strlen($upload['baseurl']));
+            $candidate = preg_replace('/\.(png|jpg|jpeg)$/i', '.webp', $upload['basedir'] . $rel);
+            if (file_exists($candidate)) {
+                return preg_replace('/\.(png|jpg|jpeg)$/i', '.webp', $url);
+            }
+        }
+    }
+
+    return '';
+}
+
 /**
  * Image wrapper identical to the reference (<span wrap><span><img></span></span>).
  * $src may be a URL or an attachment ID.
@@ -18,18 +48,40 @@ function nundia_img($filename)
 function nundia_image($src, $alt = '', $wrap = 'relative w-full', $size = 'large', $eager = false, $fit = 'object-cover')
 {
     $srcset = '';
+    $width = 0;
+    $height = 0;
     if (is_numeric($src)) {
         $id = (int) $src;
-        $src = wp_get_attachment_image_url($id, $size);
+        $image_data = wp_get_attachment_image_src($id, $size);
+        if ($image_data) {
+            $src = $image_data[0];
+            $width = (int) $image_data[1];
+            $height = (int) $image_data[2];
+        } else {
+            $src = wp_get_attachment_image_url($id, $size);
+        }
         $srcset = wp_get_attachment_image_srcset($id, $size);
     }
     if (!$src) return '';
     $wrap = trim($wrap);
     if (strpos(' ' . $wrap . ' ', ' inline-block ') === false) $wrap = 'inline-block ' . $wrap;
     if (strpos(' ' . $wrap . ' ', ' relative ') === false && strpos(' ' . $wrap . ' ', ' absolute ') === false) $wrap .= ' relative';
-    return '<span class="' . esc_attr($wrap) . '"><span class="block relative w-full h-full overflow-hidden"><img src="' . esc_url($src) . '"'
-        . ($srcset ? ' srcset="' . esc_attr($srcset) . '" sizes="(min-width: 1024px) 50vw, 100vw"' : '')
-        . ' alt="' . esc_attr($alt) . '"' . ($eager ? ' fetchpriority="high"' : ' loading="lazy"') . ' decoding="async" class="w-full h-full inset-0 absolute ' . esc_attr($fit) . '"></span></span>';
+
+    $webp_src = nundia_webp_candidate($src);
+    $dim_attr = ($width && $height) ? ' width="' . $width . '" height="' . $height . '"' : '';
+    $loading_attr = $eager ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"';
+    $sizes_attr = $srcset ? ' sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"' : '';
+
+    $img_tag = '<img src="' . esc_url($src) . '"'
+        . ($srcset ? ' srcset="' . esc_attr($srcset) . '"' . $sizes_attr : '')
+        . ' alt="' . esc_attr($alt) . '"'
+        . $dim_attr . $loading_attr . ' class="w-full h-full inset-0 absolute ' . esc_attr($fit) . '">';
+
+    if ($webp_src && $webp_src !== $src && empty($srcset)) {
+        $img_tag = '<picture><source srcset="' . esc_url($webp_src) . '" type="image/webp">' . $img_tag . '</picture>';
+    }
+
+    return '<span class="' . esc_attr($wrap) . '"><span class="block relative w-full h-full overflow-hidden">' . $img_tag . '</span></span>';
 }
 
 /** Featured image of a post (ID) or a theme fallback. */
@@ -279,50 +331,93 @@ function nundia_product_card($product, $extra_attrs = '')
 <?php
 }
 
-/** Supported languages (Google Translate codes) – same set as the reference. */
+/** Supported languages (Google Translate codes) */
 function nundia_languages()
 {
     return array(
         'it' => array('Italiano', 'it'),
-        'en' => array('English', 'gb'),
+        'en' => array('English', 'en'),
         'de' => array('Deutsch', 'de'),
         'fr' => array('Français', 'fr'),
         'ru' => array('Русский', 'ru'),
-        'ar' => array('العربية', 'sa'),
-        'ja' => array('日本語', 'jp'),
+        'ar' => array('العربية', 'ar'),
+        'ja' => array('日本語', 'ja'),
     );
 }
 
-/** Current language from the googtrans cookie ("/it/en"). */
+/** Local SVG flag URL */
+function nundia_flag_url($code)
+{
+    $map = array(
+        'it' => 'it',
+        'en' => 'en',
+        'gb' => 'en',
+        'de' => 'de',
+        'fr' => 'fr',
+        'ru' => 'ru',
+        'ar' => 'ar',
+        'sa' => 'ar',
+        'ja' => 'ja',
+        'jp' => 'ja',
+    );
+    $key = strtolower(trim($code));
+    $file = isset($map[$key]) ? $map[$key] : 'it';
+    return get_template_directory_uri() . '/assets/images/flags/' . $file . '.svg';
+}
+
+/** Current language from explicit companion cookie or googtrans cookie */
 function nundia_current_lang()
 {
     $langs = nundia_languages();
-    if (!empty($_COOKIE['googtrans']) && preg_match('#^/it/([a-z-]+)$#i', $_COOKIE['googtrans'], $m) && isset($langs[strtolower($m[1])])) {
-        return strtolower($m[1]);
+
+    // 1. Explicit theme companion cookie
+    if (!empty($_COOKIE['nundia_lang'])) {
+        $c = strtolower(trim($_COOKIE['nundia_lang']));
+        if ($c === 'it') {
+            return 'it';
+        }
+        if (isset($langs[$c])) {
+            return $c;
+        }
     }
+
+    // 2. Google Translate cookie (/it/en, /auto/en, it/en, auto/en, /it|en, etc.)
+    if (!empty($_COOKIE['googtrans'])) {
+        $val = trim(urldecode($_COOKIE['googtrans']), " \t\n\r\0\x0B\"'/");
+        if (preg_match('#(?:^|/|\|)([a-z]{2}(?:-[a-z]{2})?)$#i', $val, $m)) {
+            $code = strtolower($m[1]);
+            if ($code === 'it') {
+                return 'it';
+            }
+            if (isset($langs[$code])) {
+                return $code;
+            }
+        }
+    }
+
     return 'it';
 }
 
 /**
  * Language dropdown: shows only the language in use; the others open in a menu.
- * $variant: 'light' (on transparent/dark header) or 'dark' (on white).
  */
 function nundia_language_switcher($id = 'lang')
 {
     $langs = nundia_languages();
     $cur = nundia_current_lang();
+    $flag_url = nundia_flag_url($cur);
 ?>
     <div class="nd-lang relative notranslate" data-lang-switcher translate="no">
         <button type="button" class="nd-lang-btn flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] opacity-80 transition-opacity hover:opacity-100" aria-haspopup="listbox" aria-expanded="false" aria-controls="<?php echo esc_attr($id); ?>-menu" aria-label="Lingua / Language">
-            <span class="nd-flag h-[18px] w-[18px] overflow-hidden rounded-full"><img src="https://flagcdn.com/w40/<?php echo esc_attr($langs[$cur][1]); ?>.png" alt="" class="h-full w-full object-cover"></span>
-            <span><?php echo esc_html(strtoupper($cur)); ?></span>
+            <span class="nd-flag h-[18px] w-[18px] overflow-hidden rounded-full"><img src="<?php echo esc_url($flag_url); ?>" alt="<?php echo esc_attr($langs[$cur][0]); ?>" width="18" height="18" class="js-lang-flag h-full w-full object-cover"></span>
+            <span class="js-lang-code"><?php echo esc_html(strtoupper($cur)); ?></span>
             <?php echo nundia_icon('chevron-down', 'nd-lang-chevron h-3 w-3', 1.8); ?>
         </button>
         <ul id="<?php echo esc_attr($id); ?>-menu" class="nd-lang-menu" role="listbox" hidden>
             <?php foreach ($langs as $code => $l): ?>
                 <li>
-                    <button type="button" role="option" data-lang="<?php echo esc_attr($code); ?>" aria-selected="<?php echo $code === $cur ? 'true' : 'false'; ?>" class="nd-lang-item">
-                        <span class="h-[18px] w-[18px] shrink-0 overflow-hidden rounded-full"><img src="https://flagcdn.com/w40/<?php echo esc_attr($l[1]); ?>.png" alt="" loading="lazy" class="h-full w-full object-cover"></span>
+                    <button type="button" role="option" data-lang="<?php echo esc_attr($code); ?>" data-lang-current="<?php echo esc_attr($cur); ?>" data-flag="<?php echo esc_url(nundia_flag_url($code)); ?>" aria-selected="<?php echo $code === $cur ? 'true' : 'false'; ?>" class="nd-lang-item">
+                        <span class="h-[18px] w-[18px] shrink-0 overflow-hidden rounded-full"><img src="<?php echo esc_url(nundia_flag_url($code)); ?>" alt="" width="18" height="18" loading="lazy" class="h-full w-full object-cover"></span>
                         <span><?php echo esc_html($l[0]); ?></span>
                     </button>
                 </li>

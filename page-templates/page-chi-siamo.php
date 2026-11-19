@@ -52,7 +52,7 @@ if ($heritage_eyebrow || $has_heritage || $has_philosophy): ?>
         <?php endif; ?>
 
         <?php if ($has_heritage || $has_philosophy): ?>
-        <div class="flex item-center justfy-spacebetwin pt-2.5">
+        <div class="grid gap-12 lg:grid-cols-2 lg:gap-20 pt-2.5 items-start">
             <?php if ($has_heritage): ?>
             <div class="reveal">
                 <?php if ($heritage_title): ?>

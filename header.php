@@ -14,14 +14,62 @@ $nav_items      = nundia_nav_items();
 $brand          = nd_opt('brand_name');
 $slogan         = nd_opt('brand_slogan');
 $group          = nd_opt('brand_group');
+$cur_lang       = function_exists('nundia_current_lang') ? nundia_current_lang() : 'it';
+$is_translated  = ($cur_lang !== 'it');
 ?>
 <!DOCTYPE html>
-<html <?php language_attributes(); ?>>
+<html <?php language_attributes(); ?><?php echo $is_translated ? ' class="gt-translating"' : ''; ?>>
 
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#FFFFFF">
+
+    <!-- Anti-Flash of Untranslated Content (Zero-Flicker Multi-Language Navigation) -->
+    <style id="gt-anti-flash">
+        html.gt-translating body {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        body {
+            transition: opacity 0.18s ease-in-out;
+        }
+    </style>
+    <script>
+        (function() {
+            window.__gt_unveiled = false;
+            window.__gt_unveil = function() {
+                if (window.__gt_unveiled) return;
+                window.__gt_unveiled = true;
+                document.documentElement.classList.remove('gt-translating');
+            };
+
+            try {
+                var stored = JSON.parse(localStorage.getItem('__GT_TRANSLATE_LANGS'));
+                var cookieMatch = document.cookie.match(/(?:^|;\s*)nundia_lang=([^;]+)/);
+                var cookieLang = cookieMatch ? decodeURIComponent(cookieMatch[1]).toLowerCase() : null;
+                var lang = (stored && stored.tgtLang && stored.tgtLang.toLowerCase()) || cookieLang;
+                if (lang && lang !== 'it') {
+                    document.documentElement.classList.add('gt-translating');
+                    document.documentElement.setAttribute('lang', lang);
+                    if (lang === 'ar') document.documentElement.setAttribute('dir', 'rtl');
+                } else {
+                    window.__gt_unveil();
+                }
+            } catch (e) {
+                window.__gt_unveil();
+            }
+
+            // Fail-safe timeout: never hold page hidden for more than 1.2s under any circumstances
+            setTimeout(window.__gt_unveil, 1200);
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.gtranslate.net">
+    <link rel="preconnect" href="https://cdn.gtranslate.net" crossorigin>
+    <script src="https://cdn.gtranslate.net/widgets/latest/lib.min.js" defer onload="if(window.__GT&&window.__GT.translator){window.__GT.translator.resultCallback=window.__gt_unveil;if(window.__GT.translator.finished)window.__gt_unveil();}"></script>
     <?php if (!has_site_icon()): // Site icon set in WordPress (Impostazioni → Generali) wins 
     ?>
         <link rel="icon" type="image/png" href="<?php echo esc_url(nundia_img('nundia-emblem.png')); ?>">

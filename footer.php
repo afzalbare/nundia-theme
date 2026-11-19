@@ -164,7 +164,8 @@ $socials = array('instagram' => 'Instagram', 'facebook' => 'Facebook', 'linkedin
 </div>
 
 </div><!-- /.flex wrapper -->
-<div id="google_translate_element" class="hidden" aria-hidden="true"></div>
+<div class="gtranslate_wrapper" style="display:none;" aria-hidden="true"></div>
+<div id="google_translate_element" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;" aria-hidden="true"></div>
 <?php wp_footer(); ?>
 </body>
 

@@ -92,6 +92,7 @@ while (have_posts()): the_post();
                     </div>
                     <button type="button" class="js-add-to-cart inline-flex h-12 flex-1 items-center justify-center gap-2 bg-primary px-8 text-[11px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground sm:flex-none" 
                         data-product-id="<?php echo esc_attr($id); ?>" 
+                        data-quantity="1"
                         data-format="<?php echo esc_attr($active_fmt['label'] ?? ''); ?>"
                         data-price="<?php echo esc_attr($initial_price); ?>"
                         data-label="Aggiungi al carrello" 
